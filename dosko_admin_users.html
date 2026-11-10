@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>(주)도스코 전산실 사용자·권한·보안 설정 (/admin/users)</title>
+  <style>
+    :root {
+      --bg: #0b101d; --card: #121a2b; --sub: #0f1624; --border: #26334d;
+      --text: #e2e8f0; --muted: #94a3b8; --accent: #10b981; --cyan: #38bdf8;
+      --amber: #f59e0b; --rose: #ef4444; --indigo: #6366f1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; font-size: 13px; }
+    header {
+      background: #080c16; border-bottom: 1px solid var(--border);
+      padding: 12px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      position: sticky; top: 0; z-index: 40;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .badge-it { background: #dc2626; color: #fff; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px; }
+    .nav-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--border); background: #1e293b; color: #f8fafc;
+      padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn:hover { background: #334155; }
+    .btn-primary { background: #059669; border-color: #10b981; }
+    .btn-primary:hover { background: #047857; }
+    .btn-blue { background: #1d4ed8; border-color: #3b82f6; }
+    .btn-amber { background: #b45309; border-color: #f59e0b; }
+    .btn-danger { background: #991b1b; border-color: #ef4444; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
+
+    main { max-width: 1520px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .stat-card .lbl { font-size: 11px; color: var(--muted); font-weight: 700; }
+    .stat-card .val { font-size: 22px; font-weight: 900; margin-top: 4px; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .tab-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 9px 16px; border-radius: 9px; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .tab-btn.active { background: #0284c7; border-color: #38bdf8; color: #fff; }
+    .tab-panel { display: none; flex-direction: column; gap: 14px; }
+    .tab-panel.active { display: flex; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .input, select, textarea {
+      background: #080d19; border: 1px solid #334155; color: #f8fafc;
+      padding: 7px 10px; border-radius: 7px; font-size: 12px; outline: none;
+    }
+    .input:focus, select:focus, textarea:focus { border-color: var(--cyan); }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #0f1b33; color: #93c5fd; font-weight: 800; padding: 9px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-size: 11.5px; }
+    td { padding: 8px 10px; border-bottom: 1px solid #1e293b; white-space: nowrap; font-size: 12px; }
+    tr:hover { background: rgba(56, 189, 248, 0.06); }
+
+    .pill { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 800; }
+    .p-green { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .p-amber { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+    .p-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .p-blue { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.35); }
+    .p-gray { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 90;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: #11192b; border: 1px solid #334155; border-radius: 14px;
+      width: 100%; max-width: 820px; max-height: 92vh; overflow-y: auto; padding: 20px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+    }
+    .modal h2 { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--cyan); display: flex; justify-content: space-between; align-items: center; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+    .field input, .field select { width: 100%; }
+
+    .box-group { background: #0a101d; border: 1px solid #24314a; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .box-title { font-size: 12px; font-weight: 800; color: #cbd5e1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .line-checks { display: flex; flex-wrap: wrap; gap: 8px; }
+    .line-chip {
+      display: inline-flex; align-items: center; gap: 5px; background: #162238;
+      border: 1px solid #334155; padding: 5px 10px; border-radius: 7px; cursor: pointer; font-weight: 700; font-size: 12px;
+    }
+    .mod-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; }
+    .mod-row { display: flex; align-items: center; justify-content: space-between; background: #121c30; border: 1px solid #24324d; padding: 6px 10px; border-radius: 7px; font-size: 12px; }
+    .toast {
+      position: fixed; right: 20px; bottom: 20px; z-index: 120; padding: 11px 16px;
+      border-radius: 10px; font-weight: 700; font-size: 13px; display: none;
+      background: #065f46; border: 1px solid #10b981; color: #ecfdf5; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .toast.err { background: #7f1d1d; border-color: #ef4444; color: #fef2f2; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="badge-it">IT_ADMIN ONLY</span>
+      <div>
+        <div style="font-size:16px; font-weight:900;">(주)도스코 사용자 등록 · 권한 · 보안 통합 콘솔</div>
+        <div id="meBanner" style="font-size:11.5px; color:#38bdf8;">인증 확인 중...</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn" href="/">🔥 통합 관제(Pro)</a>
+      <a class="btn" href="/easy">🌿 현장(Easy)</a>
+      <a class="btn" href="/portal">🏭 외주 포털</a>
+      <button class="btn btn-amber" onclick="openNewUserModal()">+ 신규 사원 등록</button>
+      <button class="btn btn-danger" onclick="doLogout()">사번 전환 / 로그아웃</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchAdminTab('tab-users', this)">👥 사원 · 권한 · 담당호기 매트릭스</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-csv', this)">📥 그룹웨어 CSV 일괄 동기화 (PII 배제)</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-partners', this)">🏭 협력사 포털 & API 연동 토큰</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-audit', this)">🛡️ 보안 감사로그 & 활성 세션</button>
+    </div>
+
+    <!-- TAB 1: 사원 목록 & 권한 -->
+    <div id="tab-users" class="tab-panel active">
+      <div class="card">
+        <div class="toolbar">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <input id="qSearch" class="input" placeholder="사번 / 이름 / 부서 검색..." style="width:210px;" oninput="renderUsersTable()">
+            <select id="qRoleFilter" onchange="renderUsersTable()">
+              <option value="">전체 역할군</option>
+              <option value="PENDING_ONLY">★ 전산실 설정 대기 (8명)</option>
+              <option value="LOCKED_ONLY">일시정지/잠금 차단</option>
+              <option value="IT_ADMIN">전산실 관리자 (IT_ADMIN)</option>
+              <option value="EXEC_READ">임원 조회전용 (EXEC_READ)</option>
+              <option value="BIZ_EXEC">총책임자 (BIZ_EXEC)</option>
+              <option value="SALES_MGR">영업부 (SALES_MGR)</option>
+              <option value="PROD_GLOBAL">생산전역관리 (PROD_GLOBAL)</option>
+              <option value="QC_PROD_MGR">품질+생산전역 (QC_PROD_MGR)</option>
+              <option value="PROD_OP">현장 생산자 (PROD_OP)</option>
+              <option value="RESTRICTED">설정 대기 (RESTRICTED)</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" onclick="loadAllAdminData()">🔄 새로고침</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>사번</th><th>이름</th><th>조직 (부서 &gt; 팀)</th><th>직위</th><th>인사상태</th>
+                <th>연락처</th><th>이카운트코드</th><th>역할군</th><th>담당호기</th><th>비번정책</th><th>로그인/표시옵션</th><th>최종 로그인</th><th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 그룹웨어 CSV 동기화 -->
+    <div id="tab-csv" class="tab-panel">
+      <div class="card">
+        <h3 style="font-size:15px; margin-bottom:8px; color:var(--cyan);">그룹웨어 사원 CSV/TSV 일괄 동기화 (휴대전화·생일·이메일·주소 자동 폐기)</h3>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
+          하이웍스(Hiworks) 등에서 내보낸 CSV 파일을 선택하거나 붙여넣으면 <strong>개인정보(PII) 컬럼을 즉시 폐기</strong>하고 사번 기준으로 신규/변경/일시정지 대상만 비교해 안전하게 반영합니다.<br>
+          영업부 겸직 추가행(사번 공란 행)은 직전 사번의 <code>org_level5</code>로 자동 병합됩니다.
+        </p>
+        <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
+          <input type="file" id="csvFile" accept=".csv,.tsv,.txt" class="input" onchange="readCsvFile(this)">
+          <button class="btn btn-blue" onclick="previewCsvImport()">1단계: 미리보기 (Dry-Run)</button>
+          <button class="btn btn-primary" onclick="applyCsvImport()">2단계: 실제 DB 일괄 반영</button>
+        </div>
+        <textarea id="csvText" rows="7" style="width:100%; font-family:monospace;" placeholder="여기에 그룹웨어 CSV/TSV 내용을 붙여넣거나 위에서 파일을 선택하세요..."></textarea>
+        <div id="csvResult" style="margin-top:12px; font-size:12px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 외주 협력사 & API 토큰 -->
+    <div id="tab-partners" class="tab-panel">
+      <div class="card">
+        <div class="toolbar">
+          <h3 style="font-size:15px; color:var(--cyan);">외주 협력사 포털 접속 계정 (6개사)</h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>코드</th><th>창고/협력사명</th><th>공정</th><th>담당자</th><th>활성상태</th><th>포털 접속코드 변경</th></tr></thead>
+            <tbody id="partnersBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <h3 style="font-size:15px; color:var(--cyan);">API 연동 토큰 (ECOUNT RPA 크롬확장 / 현장 키오스크)</h3>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input id="tokName" class="input" placeholder="토큰 용도 (예: ECOUNT RPA 사무실PC)">
+            <select id="tokScope">
+              <option value="ECOUNT_RPA">ECOUNT_RPA (DOM/전표 연계)</option>
+              <option value="KIOSK_MONITOR">KIOSK_MONITOR (현장 모니터 읽기전용)</option>
+            </select>
+            <button class="btn btn-primary" onclick="createApiToken()">+ API 토큰 발급</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>접두사</th><th>명칭</th><th>스코프</th><th>상태</th><th>최근 사용</th><th>생성자</th><th>관리</th></tr></thead>
+            <tbody id="tokensBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 감사로그 & 활성 세션 -->
+    <div id="tab-audit" class="tab-panel">
+      <div class="card">
+        <div class="toolbar">
+          <h3 style="font-size:15px; color:var(--cyan);">현재 활성 로그인 세션 (강제 로그아웃 가능)</h3>
+          <button class="btn" onclick="loadAuditAndSessions()">🔄 새로고침</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>유형</th><th>사번 / 협력사</th><th>접속 IP</th><th>발급 시각</th><th>최근 활동</th><th>만료 예정</th><th>관리</th></tr></thead>
+            <tbody id="sessionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <h3 style="font-size:15px; color:var(--cyan);">보안 감사로그 (로그인 · 권한차단 403 · 권한변경 · 생산실적 수정)</h3>
+          <div style="display:flex; gap:8px;">
+            <select id="auditTypeFilter" onchange="loadAuditAndSessions()">
+              <option value="">전체 이벤트</option>
+              <option value="LOGIN_OK">LOGIN_OK</option>
+              <option value="LOGIN_FAIL">LOGIN_FAIL</option>
+              <option value="ACCOUNT_LOCKED">ACCOUNT_LOCKED</option>
+              <option value="FORBIDDEN_403">FORBIDDEN_403</option>
+              <option value="USER_MOD">USER_MOD</option>
+              <option value="PW_CHANGED">PW_CHANGED</option>
+              <option value="DATA_WRITE">DATA_WRITE</option>
+              <option value="TOKEN_MOD">TOKEN_MOD</option>
+            </select>
+            <input id="auditEmpFilter" class="input" placeholder="사번 필터" style="width:110px;">
+            <button class="btn" onclick="loadAuditAndSessions()">조회</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>시각</th><th>사번</th><th>이름</th><th>역할</th><th>IP</th><th>유형</th><th>경로</th><th>대상/상세</th></tr></thead>
+            <tbody id="auditBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 사원 권한 편집 모달 -->
+  <div id="editModal" class="modal-backdrop">
+    <div class="modal">
+      <h2>
+        <span id="editModalTitle">사원 권한·호기 설정</span>
+        <button class="btn btn-sm" onclick="closeModal('editModal')">✕ 닫기</button>
+      </h2>
+      <input type="hidden" id="mUserId">
+      <input type="hidden" id="mEmpNo">
+
+      <div class="form-grid">
+        <div class="field"><label>이름</label><input id="mName" class="input"></div>
+        <div class="field"><label>조직 L4 (부/팀)</label><input id="mL4" class="input"></div>
+        <div class="field"><label>조직 L5 (조/반)</label><input id="mL5" class="input"></div>
+        <div class="field"><label>직위</label><input id="mTitle" class="input"></div>
+        <div class="field"><label>근로형태</label><input id="mWorkType" class="input"></div>
+        <div class="field"><label>휴대전화 (본인인증·식별)</label><input id="mPhoneNo" class="input" placeholder="010-XXXX-XXXX"></div>
+        <div class="field"><label>이카운트 사원코드</label><input id="mEcountEmpCode" class="input" placeholder="예: 01, 04, 11 등"></div>
+        <div class="field">
+          <label>비밀번호 정책</label>
+          <select id="mPwRuleType">
+            <option value="WORKER_4DIGIT">현장 작업자 (4자리 숫자)</option>
+            <option value="PROD_MGR_8DIGIT">현장 관리자/팀장 (4~8자리 숫자)</option>
+            <option value="OFFICE_COMPLEX">사무직/임원 (8자리 이상 2종 조합)</option>
+          </select>
+        </div>
+        <div class="field"><label>비밀번호 변경주기(개월)</label><input id="mPwExpireMonths" type="number" class="input" min="1" max="99" value="3"></div>
+        <div class="field">
+          <label>인사 상태</label>
+          <select id="mEmpStatus">
+            <option value="정상">정상</option>
+            <option value="일시정지">일시정지 (로그인 차단)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>역할군 (Role Preset)</label>
+          <select id="mRole" onchange="onRolePresetChange()">
+            <option value="IT_ADMIN">IT_ADMIN (전산실 총 관리자)</option>
+            <option value="EXEC_READ">EXEC_READ (임원 조회전용)</option>
+            <option value="BIZ_EXEC">BIZ_EXEC (총책임자)</option>
+            <option value="SALES_MGR">SALES_MGR (영업부)</option>
+            <option value="PROD_GLOBAL">PROD_GLOBAL (생산전역관리)</option>
+            <option value="QC_PROD_MGR">QC_PROD_MGR (품질+생산전역)</option>
+            <option value="PROD_OP">PROD_OP (현장 생산자)</option>
+            <option value="RESTRICTED">RESTRICTED (설정 대기/커스텀)</option>
+            <option value="LOCKED">LOCKED (로그인 차단)</option>
+          </select>
+        </div>
+        <div class="field"><label>접속 허용 IP CIDR (전체=ALL)</label><input id="mIpCidr" class="input" placeholder="ALL 또는 192.168.0.0/24"></div>
+        <div class="field"><label>세션 만료시간(분)</label><input id="mTtl" type="number" class="input" min="15" max="1440" value="480"></div>
+      </div>
+
+      <div class="box-group">
+        <div class="box-title">
+          <span>담당호기 / 공정 배정 (<code>allowed_lines</code>)</span>
+          <div style="display:flex; gap:5px;">
+            <button type="button" class="btn btn-sm" onclick="setLinesQuick(['ALL'])">전 호기(ALL)</button>
+            <button type="button" class="btn btn-sm" onclick="setLinesQuick(['L1','L2','L3','L5','L6','L7'])">열처리 전체</button>
+            <button type="button" class="btn btn-sm" onclick="setLinesQuick(['L8','L9'])">연마(L8~L9)</button>
+            <button type="button" class="btn btn-sm" onclick="setLinesQuick(['PACK'])">포장반(PACK)</button>
+            <button type="button" class="btn btn-sm" onclick="setLinesQuick([])">비우기</button>
+          </div>
+        </div>
+        <div class="line-checks" id="lineCheckboxes"></div>
+      </div>
+
+      <div class="box-group">
+        <div class="box-title"><span>모듈별 세부 허용 범위 (총무부·개발실·커스텀 제어)</span></div>
+        <div class="mod-grid" id="modulePermGrid"></div>
+      </div>
+
+      <div class="box-group">
+        <div class="box-title"><span>계정 제어 스위치</span></div>
+        <div style="display:flex; flex-wrap:wrap; gap:14px;">
+          <label class="line-chip"><input type="checkbox" id="swCanLogin"> 로그인 허용 (can_login)</label>
+          <label class="line-chip"><input type="checkbox" id="swActive"> 계정 활성 (is_active)</label>
+          <label class="line-chip"><input type="checkbox" id="swPending"> 전산실 설정 대기 표시</label>
+          <label class="line-chip"><input type="checkbox" id="swViewPrice"> 단가·매출 금액 표시</label>
+          <label class="line-chip"><input type="checkbox" id="swEditConf"> 마감일 소급 수정 허용</label>
+          <label class="line-chip"><input type="checkbox" id="swExport"> 엑셀/CSV 내보내기</label>
+          <label class="line-chip"><input type="checkbox" id="swRpa"> ECOUNT RPA 실행</label>
+          <label class="line-chip"><input type="checkbox" id="swMustPw"> 다음 로그인 비번변경 강제</label>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-amber" type="button" onclick="resetUserPassword()">🔄 초기비번(사번+생일) 원복 초기화</button>
+          <button class="btn" type="button" onclick="unlockUser()">🔓 6회 차단 즉시 해제</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" type="button" onclick="closeModal('editModal')">취소</button>
+          <button class="btn btn-primary" type="button" onclick="saveUserModal()">💾 권한·호기 변경 저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 신규 사원 등록 모달 -->
+  <div id="newUserModal" class="modal-backdrop">
+    <div class="modal" style="max-width:560px;">
+      <h2><span>+ 신규 사원 등록</span><button class="btn btn-sm" onclick="closeModal('newUserModal')">✕</button></h2>
+      <div class="form-grid">
+        <div class="field"><label>사번 (로그인 ID, 필수)</label><input id="nEmpNo" class="input" placeholder="예: 1212"></div>
+        <div class="field"><label>이름 (필수)</label><input id="nName" class="input" placeholder="홍길동"></div>
+        <div class="field"><label>그룹웨어 ID (선택)</label><input id="nGwId" class="input" placeholder="dosko.hgd"></div>
+        <div class="field"><label>부서 (L4)</label><input id="nL4" class="input" value="생산부"></div>
+        <div class="field"><label>팀/조 (L5)</label><input id="nL5" class="input" value="A조"></div>
+        <div class="field"><label>직위</label><input id="nTitle" class="input" value="사원"></div>
+        <div class="field">
+          <label>역할군</label>
+          <select id="nRole">
+            <option value="PROD_OP">PROD_OP (현장 생산자)</option>
+            <option value="PROD_GLOBAL">PROD_GLOBAL (생산전역관리)</option>
+            <option value="QC_PROD_MGR">QC_PROD_MGR (품질+생산전역)</option>
+            <option value="SALES_MGR">SALES_MGR (영업부)</option>
+            <option value="BIZ_EXEC">BIZ_EXEC (총책임자)</option>
+            <option value="EXEC_READ">EXEC_READ (임원 조회전용)</option>
+            <option value="RESTRICTED">RESTRICTED (설정 대기)</option>
+          </select>
+        </div>
+        <div class="field"><label>담당호기 (쉼표 구분)</label><input id="nLines" class="input" placeholder="L1,L5 또는 PACK"></div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>초기 비밀번호 (비워두면 영·숫·특 랜덤 10자 자동 생성)</label>
+        <input id="nTempPw" class="input" placeholder="영문+숫자+특수문자 8자 이상 또는 공란">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn" onclick="closeModal('newUserModal')">취소</button>
+        <button class="btn btn-primary" onclick="submitNewUser()">등록 및 임시비번 확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1회성 발급 비밀/비번 안내 모달 -->
+  <div id="secretBoxModal" class="modal-backdrop">
+    <div class="modal" style="max-width:480px;">
+      <h2><span>🔑 발급 결과 (1회만 표시)</span><button class="btn btn-sm" onclick="closeModal('secretBoxModal')">✕</button></h2>
+      <p style="font-size:12px; color:#fbbf24; margin-bottom:10px;">창을 닫으면 다시 확인할 수 없습니다. 반드시 복사해 본인에게 안전히 전달하세요.</p>
+      <pre id="secretBoxText" style="background:#070b14; border:1px solid #10b981; color:#34d399; padding:12px; border-radius:8px; font-size:13px; white-space:pre-wrap; user-select:all;"></pre>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+        <button class="btn btn-primary" onclick="copySecretBox()">📋 클립보드 복사</button>
+        <button class="btn" onclick="closeModal('secretBoxModal')">확인 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const ALL_LINES = ["L1","L2","L3","L5","L6","L7","L8","L9","PACK"];
+    const LINE_LABELS = { L1:"1호기(L1)", L2:"2호기(L2)", L3:"3호기(L3)", L5:"5호기(L5)", L6:"6호기(L6)", L7:"7호기(L7)", L8:"수냉연마(L8)", L9:"연마(L9)", PACK:"포장반(PACK)" };
+    const MODULES = [
+      ["prod_easy", "생산입력(이지모드)"],
+      ["prod_log", "생산일지(열·수냉)"],
+      ["plc_monitor", "실시간 PLC 모니터링"],
+      ["qc_inspect", "품질검사·중간검사"],
+      ["grinding", "수냉연마·연마(L8/L9)"],
+      ["outsourcing", "외주가공·원소재"],
+      ["sales_ship", "영업·출하·명세서"],
+      ["power_report", "전력피크·보고서"],
+      ["ecount_rpa", "ECOUNT RPA 연계"],
+    ];
+    const ROLE_LABELS = {
+      IT_ADMIN: "전산실 총 관리자", EXEC_READ: "임원(조회전용)", BIZ_EXEC: "생산·영업 총책임",
+      SALES_MGR: "영업부 관리자", PROD_GLOBAL: "생산전역관리", QC_PROD_MGR: "품질+생산전역",
+      PROD_OP: "현장 생산자", RESTRICTED: "전산실 설정 대기", LOCKED: "일시정지 차단",
+    };
+    const ROLE_DEFAULT_MODS = {
+      IT_ADMIN:    { prod_easy:"RW", prod_log:"RW", plc_monitor:"RW", qc_inspect:"RW", grinding:"RW", outsourcing:"RW", sales_ship:"RW", power_report:"RW", ecount_rpa:"RW" },
+      EXEC_READ:   { prod_easy:"R",  prod_log:"R",  plc_monitor:"R",  qc_inspect:"R",  grinding:"R",  outsourcing:"R",  sales_ship:"R",  power_report:"R",  ecount_rpa:"R"  },
+      BIZ_EXEC:    { prod_easy:"RW", prod_log:"RW", plc_monitor:"RW", qc_inspect:"RW", grinding:"RW", outsourcing:"RW", sales_ship:"RW", power_report:"RW", ecount_rpa:"RW" },
+      SALES_MGR:   { prod_easy:"RW", prod_log:"RW", plc_monitor:"RW", qc_inspect:"RW", grinding:"RW", outsourcing:"RW", sales_ship:"RW", power_report:"RW", ecount_rpa:"RW" },
+      PROD_GLOBAL: { prod_easy:"RW", prod_log:"RW", plc_monitor:"RW", qc_inspect:"R",  grinding:"RW", outsourcing:"R",  sales_ship:"R",  power_report:"R",  ecount_rpa:"RW" },
+      QC_PROD_MGR: { prod_easy:"RW", prod_log:"RW", plc_monitor:"RW", qc_inspect:"RW", grinding:"RW", outsourcing:"R",  sales_ship:"R",  power_report:"R",  ecount_rpa:"RW" },
+      PROD_OP:     { prod_easy:"RW", prod_log:"R",  plc_monitor:"R",  qc_inspect:"NONE", grinding:"RW", outsourcing:"NONE", sales_ship:"NONE", power_report:"NONE", ecount_rpa:"NONE" },
+      RESTRICTED:  { prod_easy:"NONE", prod_log:"NONE", plc_monitor:"NONE", qc_inspect:"NONE", grinding:"NONE", outsourcing:"NONE", sales_ship:"NONE", power_report:"NONE", ecount_rpa:"NONE" },
+      LOCKED:      { prod_easy:"NONE", prod_log:"NONE", plc_monitor:"NONE", qc_inspect:"NONE", grinding:"NONE", outsourcing:"NONE", sales_ship:"NONE", power_report:"NONE", ecount_rpa:"NONE" },
+    };
+
+    let csrfToken = sessionStorage.getItem("dosko_csrf_token") || "";
+    let usersList = [];
+    let partnersList = [];
+    let tokensList = [];
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+    function toast(msg, isErr=false) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.className = "toast" + (isErr ? " err" : "");
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 3600);
+    }
+    async function apiFetch(url, opts={}) {
+      const headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+      if (csrfToken && (opts.method || "GET").toUpperCase() !== "GET") {
+        headers["X-CSRF-Token"] = csrfToken;
+      }
+      const res = await fetch(url, Object.assign({ credentials: "include", cache: "no-store", headers }, opts));
+      if (res.status === 401) { window.location.replace("/login?next=/admin/users"); throw new Error("인증 필요"); }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || data.error || ("HTTP " + res.status));
+      return data;
+    }
+
+    function switchAdminTab(tabId, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      document.getElementById(tabId).classList.add("active");
+      if (tabId === "tab-audit") loadAuditAndSessions();
+    }
+
+    async function init() {
+      const me = await fetch("/api/auth/me", { credentials: "include", cache: "no-store" }).then(r => r.json()).catch(() => ({}));
+      if (!me || !me.authenticated || !me.user) { window.location.replace("/login?next=/admin/users"); return; }
+      if (me.user.must_change_pw) { window.location.replace("/change-password"); return; }
+      if (me.user.role_code !== "IT_ADMIN") {
+        document.body.innerHTML = `<div style="max-width:520px;margin:80px auto;padding:28px;background:#11192b;border:1px solid #ef4444;border-radius:12px;text-align:center;">
+          <h2 style="color:#fca5a5;margin-bottom:10px;">⛔ 전산실 관리자 전용 메뉴</h2>
+          <p style="color:#cbd5e1;margin-bottom:18px;">현재 계정([${esc(me.user.emp_no)}] ${esc(me.user.display_name)}, ${esc(me.user.role_code)})은 사용자·권한 관리 메뉴 접근이 차단되어 있습니다.</p>
+          <a class="btn btn-primary" href="${me.user.role_code === 'PROD_OP' ? '/easy' : '/'}">홈으로 돌아가기</a>
+        </div>`;
+        return;
+      }
+      if (me.csrf_token) csrfToken = me.csrf_token;
+      document.getElementById("meBanner").textContent = `👤 [${me.user.emp_no}] ${me.user.display_name} | ${me.user.dept_path} (${me.user.job_title}) | 관리자 세션 활성`;
+      await loadAllAdminData();
+    }
+
+    async function loadAllAdminData() {
+      try {
+        const [uRes, pRes] = await Promise.all([apiFetch("/api/admin/users"), apiFetch("/api/admin/tokens")]);
+        usersList = uRes.users || [];
+        partnersList = pRes.partners || [];
+        tokensList = pRes.tokens || [];
+        renderStats();
+        renderUsersTable();
+        renderPartnersAndTokens();
+      } catch (e) {
+        toast("데이터 조회 실패: " + e.message, true);
+      }
+    }
+
+    function renderStats() {
+      const tot = usersList.length;
+      const activeLogin = usersList.filter(u => u.can_login && u.is_active && u.role_code !== "LOCKED").length;
+      const pending = usersList.filter(u => u.is_pending_it_setup || u.role_code === "RESTRICTED").length;
+      const locked = usersList.filter(u => u.role_code === "LOCKED" || !u.is_active).length;
+      const pwLock = usersList.filter(u => (u.failed_attempts || 0) >= 5).length;
+      document.getElementById("statsGrid").innerHTML = `
+        <div class="stat-card"><div class="lbl">전체 사원 마스터</div><div class="val">${tot}명</div></div>
+        <div class="stat-card"><div class="lbl">로그인 가능 활성 계정</div><div class="val" style="color:#34d399;">${activeLogin}명</div></div>
+        <div class="stat-card"><div class="lbl">전산실 설정 대기 (RESTRICTED)</div><div class="val" style="color:#fbbf24;">${pending}명</div></div>
+        <div class="stat-card"><div class="lbl">일시정지 차단 (LOCKED)</div><div class="val" style="color:#f87171;">${locked}명</div></div>
+        <div class="stat-card"><div class="lbl">비밀번호 오류 잠금</div><div class="val" style="color:#38bdf8;">${pwLock}명</div></div>
+      `;
+    }
+
+    function renderUsersTable() {
+      const q = (document.getElementById("qSearch").value || "").trim().toLowerCase();
+      const rf = document.getElementById("qRoleFilter").value;
+      const filtered = usersList.filter(u => {
+        if (rf === "PENDING_ONLY" && !(u.is_pending_it_setup || u.role_code === "RESTRICTED")) return false;
+        else if (rf === "LOCKED_ONLY" && !(u.role_code === "LOCKED" || !u.is_active)) return false;
+        else if (rf && rf !== "PENDING_ONLY" && rf !== "LOCKED_ONLY" && u.role_code !== rf) return false;
+        if (!q) return true;
+        const hay = `${u.emp_no} ${u.display_name} ${u.org_level4||''} ${u.org_level5||''} ${u.gw_login_id||''}`.toLowerCase();
+        return hay.includes(q);
+      });
+      const tbody = document.getElementById("usersBody");
+      tbody.innerHTML = filtered.map(u => {
+        const lines = Array.isArray(u.allowed_lines) ? u.allowed_lines : [];
+        const lineStr = lines.includes("ALL") ? "전체(L1~L9,PACK)" : (lines.length ? lines.join(", ") : "-");
+        const roleCls = u.role_code === "IT_ADMIN" ? "p-red" : (u.role_code === "RESTRICTED" ? "p-amber" : (u.role_code === "LOCKED" ? "p-gray" : "p-blue"));
+        const flags = [
+          u.can_login ? '<span class="pill p-green">로그인ON</span>' : '<span class="pill p-gray">차단</span>',
+          u.can_view_price ? '<span class="pill p-blue">단가O</span>' : '',
+          u.can_edit_confirmed ? '<span class="pill p-amber">마감수정</span>' : '',
+          u.must_change_pw ? '<span class="pill p-red">초기비번</span>' : '',
+          (u.failed_attempts >= 5) ? '<span class="pill p-red">5회잠금</span>' : '',
+        ].filter(Boolean).join(" ");
+        const pwRuleBadge = u.pw_rule_type === "WORKER_4DIGIT"
+          ? '<span class="pill p-green">현장(4숫자)</span>'
+          : (u.pw_rule_type === "PROD_MGR_8DIGIT"
+            ? '<span class="pill p-blue">책임(8숫자)</span>'
+            : '<span class="pill p-amber">사무(8복합)</span>');
+        const expireStr = u.pw_expire_months ? `${u.pw_expire_months}개월` : '3개월';
+
+        return `<tr>
+          <td><strong>${esc(u.emp_no)}</strong></td>
+          <td><strong>${esc(u.display_name)}</strong></td>
+          <td>${esc([u.org_level4, u.org_level5].filter(Boolean).join(" > ") || "-")}</td>
+          <td>${esc(u.job_title || "-")}</td>
+          <td>${u.employment_status === "일시정지" ? '<span class="pill p-red">일시정지</span>' : '<span class="pill p-green">정상</span>'}</td>
+          <td style="font-family:monospace; font-size:11px;">${esc(u.phone_no || "-")}</td>
+          <td style="font-family:monospace; font-weight:bold; color:var(--cyan);">${esc(u.ecount_emp_code || "-")}</td>
+          <td><span class="pill ${roleCls}">${esc(u.role_code)}</span></td>
+          <td style="max-width:180px; white-space:normal;">${esc(lineStr)}</td>
+          <td>${pwRuleBadge} <span style="font-size:10px; color:var(--muted);">${expireStr}</span></td>
+          <td style="white-space:normal;">${flags}</td>
+          <td style="font-family:monospace; font-size:11px;">${esc(u.last_login_at || "-")}</td>
+          <td><button class="btn btn-sm btn-blue" onclick="openEditModal('${esc(u.emp_no)}')">편집·호기·비번</button></td>
+        </tr>`;
+      }).join("");
+    }
+
+    function openEditModal(empNo) {
+      const u = usersList.find(x => x.emp_no === empNo);
+      if (!u) return;
+      document.getElementById("editModalTitle").textContent = `[${u.emp_no}] ${u.display_name} (${u.job_title || '-'}) 권한·담당호기 설정`;
+      document.getElementById("mUserId").value = u.user_id;
+      document.getElementById("mEmpNo").value = u.emp_no;
+      document.getElementById("mName").value = u.display_name || "";
+      document.getElementById("mL4").value = u.org_level4 || "";
+      document.getElementById("mL5").value = u.org_level5 || "";
+      document.getElementById("mTitle").value = u.job_title || "";
+      document.getElementById("mWorkType").value = u.work_type || "";
+      document.getElementById("mPhoneNo").value = u.phone_no || "";
+      document.getElementById("mEcountEmpCode").value = u.ecount_emp_code || "";
+      document.getElementById("mPwRuleType").value = u.pw_rule_type || (u.role_code === 'PROD_OP' ? 'WORKER_4DIGIT' : (['PROD_GLOBAL','QC_PROD_MGR'].includes(u.role_code) ? 'PROD_MGR_8DIGIT' : 'OFFICE_COMPLEX'));
+      document.getElementById("mPwExpireMonths").value = u.pw_expire_months || 3;
+      document.getElementById("mEmpStatus").value = u.employment_status || "정상";
+      document.getElementById("mRole").value = u.role_code || "RESTRICTED";
+      document.getElementById("mIpCidr").value = u.allowed_ip_cidr || "ALL";
+      document.getElementById("mTtl").value = u.session_ttl_min || 480;
+
+      document.getElementById("swCanLogin").checked = !!u.can_login;
+      document.getElementById("swActive").checked = !!u.is_active;
+      document.getElementById("swPending").checked = !!u.is_pending_it_setup;
+      document.getElementById("swViewPrice").checked = !!u.can_view_price;
+      document.getElementById("swEditConf").checked = !!u.can_edit_confirmed;
+      document.getElementById("swExport").checked = !!u.can_export_excel;
+      document.getElementById("swRpa").checked = !!u.can_use_ecount_rpa;
+      document.getElementById("swMustPw").checked = !!u.must_change_pw;
+
+      const lines = (u.raw_allowed_lines || u.allowed_lines || []);
+      const isAll = lines.includes("ALL");
+      document.getElementById("lineCheckboxes").innerHTML = ALL_LINES.map(l => {
+        const chk = (isAll || lines.includes(l)) ? "checked" : "";
+        return `<label class="line-chip"><input type="checkbox" class="line-chk" value="${l}" ${chk}> ${LINE_LABELS[l]}</label>`;
+      }).join("");
+
+      const mods = u.module_perms || ROLE_DEFAULT_MODS[u.role_code] || {};
+      document.getElementById("modulePermGrid").innerHTML = MODULES.map(([mk, lbl]) => {
+        const v = mods[mk] || "NONE";
+        return `<div class="mod-row"><span>${esc(lbl)}</span>
+          <select class="mod-sel" data-mod="${mk}">
+            <option value="NONE" ${v==="NONE"?"selected":""}>없음(NONE)</option>
+            <option value="R" ${v==="R"?"selected":""}>보기(R)</option>
+            <option value="RW" ${v==="RW"?"selected":""}>입력·수정(RW)</option>
+          </select>
+        </div>`;
+      }).join("");
+
+      document.getElementById("editModal").classList.add("open");
+    }
+
+    function onRolePresetChange() {
+      const r = document.getElementById("mRole").value;
+      const defs = ROLE_DEFAULT_MODS[r] || {};
+      document.querySelectorAll(".mod-sel").forEach(sel => {
+        const mk = sel.getAttribute("data-mod");
+        if (defs[mk]) sel.value = defs[mk];
+      });
+      if (r === "EXEC_READ") {
+        document.getElementById("swCanLogin").checked = true;
+        document.getElementById("swActive").checked = true;
+        document.getElementById("swPending").checked = false;
+        document.getElementById("swEditConf").checked = false;
+        document.getElementById("swViewPrice").checked = true;
+        setLinesQuick(["ALL"]);
+      } else if (r === "LOCKED") {
+        document.getElementById("swCanLogin").checked = false;
+        document.getElementById("swActive").checked = false;
+      } else if (r !== "RESTRICTED") {
+        document.getElementById("swCanLogin").checked = true;
+        document.getElementById("swActive").checked = true;
+        document.getElementById("swPending").checked = false;
+        document.getElementById("swEditConf").checked = ["IT_ADMIN","BIZ_EXEC","SALES_MGR","PROD_GLOBAL","QC_PROD_MGR"].includes(r);
+        document.getElementById("swViewPrice").checked = ["IT_ADMIN","EXEC_READ","BIZ_EXEC","SALES_MGR"].includes(r);
+        if (r !== "PROD_OP") setLinesQuick(["ALL"]);
+      }
+    }
+
+    function setLinesQuick(list) {
+      const isAll = list.includes("ALL");
+      document.querySelectorAll(".line-chk").forEach(cb => {
+        cb.checked = isAll || list.includes(cb.value);
+      });
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+    async function saveUserModal() {
+      const empNo = document.getElementById("mEmpNo").value;
+      const checkedLines = Array.from(document.querySelectorAll(".line-chk:checked")).map(c => c.value);
+      const role = document.getElementById("mRole").value;
+      const finalLines = (checkedLines.length === ALL_LINES.length && role !== "PROD_OP") ? ["ALL"] : checkedLines;
+      const mods = {};
+      document.querySelectorAll(".mod-sel").forEach(s => { mods[s.getAttribute("data-mod")] = s.value; });
+
+      try {
+        await apiFetch("/api/admin/users/update", {
+          method: "POST",
+          body: JSON.stringify({
+            emp_no: empNo,
+            display_name: document.getElementById("mName").value.trim(),
+            org_level4: document.getElementById("mL4").value.trim(),
+            org_level5: document.getElementById("mL5").value.trim(),
+            job_title: document.getElementById("mTitle").value.trim(),
+            work_type: document.getElementById("mWorkType").value.trim(),
+            phone_no: document.getElementById("mPhoneNo").value.trim(),
+            ecount_emp_code: document.getElementById("mEcountEmpCode").value.trim(),
+            pw_rule_type: document.getElementById("mPwRuleType").value,
+            pw_expire_months: parseInt(document.getElementById("mPwExpireMonths").value || "3", 10),
+            employment_status: document.getElementById("mEmpStatus").value,
+            role_code: role,
+            allowed_lines: finalLines,
+            module_perms: mods,
+            allowed_ip_cidr: document.getElementById("mIpCidr").value.trim() || "ALL",
+            session_ttl_min: parseInt(document.getElementById("mTtl").value || "480", 10),
+            can_login: document.getElementById("swCanLogin").checked,
+            is_active: document.getElementById("swActive").checked,
+            is_pending_it_setup: document.getElementById("swPending").checked,
+            can_view_price: document.getElementById("swViewPrice").checked,
+            can_edit_confirmed: document.getElementById("swEditConf").checked,
+            can_export_excel: document.getElementById("swExport").checked,
+            can_use_ecount_rpa: document.getElementById("swRpa").checked,
+            must_change_pw: document.getElementById("swMustPw").checked,
+          }),
+        });
+        closeModal("editModal");
+        toast(`[${empNo}] 권한 및 호기 설정 저장 완료`);
+        await loadAllAdminData();
+      } catch (e) {
+        toast("저장 실패: " + e.message, true);
+      }
+    }
+
+    async function resetUserPassword() {
+      const empNo = document.getElementById("mEmpNo").value;
+      if (!confirm(`[${empNo}] 사원의 비밀번호를 초기비번(사번+생년월일 6자리)으로 원복 초기화하고 최초 로그인 시 변경 강제(must_change_pw=1)를 설정할까요?`)) return;
+      try {
+        const res = await apiFetch("/api/admin/users/reset-pw", { method: "POST", body: JSON.stringify({ emp_no: empNo }) });
+        showSecretBox(`사번: ${empNo}\n임시 비밀번호: ${res.temp_password}\n\n※ 로그인 즉시 개인 비밀번호 변경 화면으로 이동됩니다.`);
+        await loadAllAdminData();
+      } catch (e) { toast("초기화 실패: " + e.message, true); }
+    }
+
+    async function unlockUser() {
+      const empNo = document.getElementById("mEmpNo").value;
+      try {
+        await apiFetch("/api/admin/users/unlock", { method: "POST", body: JSON.stringify({ emp_no: empNo }) });
+        toast(`[${empNo}] 6회 오류 차단 해제 완료 (오류 카운트 0 리셋)`);
+        await loadAllAdminData();
+      } catch (e) { toast("잠금 해제 실패: " + e.message, true); }
+    }
+
+    function openNewUserModal() { document.getElementById("newUserModal").classList.add("open"); }
+    async function submitNewUser() {
+      const lines = (document.getElementById("nLines").value || "").split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+      try {
+        const res = await apiFetch("/api/admin/users/create", {
+          method: "POST",
+          body: JSON.stringify({
+            emp_no: document.getElementById("nEmpNo").value.trim(),
+            display_name: document.getElementById("nName").value.trim(),
+            gw_login_id: document.getElementById("nGwId").value.trim(),
+            org_level4: document.getElementById("nL4").value.trim(),
+            org_level5: document.getElementById("nL5").value.trim(),
+            job_title: document.getElementById("nTitle").value.trim(),
+            role_code: document.getElementById("nRole").value,
+            allowed_lines: lines,
+            temp_password: document.getElementById("nTempPw").value,
+          }),
+        });
+        closeModal("newUserModal");
+        showSecretBox(`신규 사원 등록 완료\n사번: ${res.emp_no}\n임시 비밀번호: ${res.temp_password}`);
+        await loadAllAdminData();
+      } catch (e) { toast("등록 실패: " + e.message, true); }
+    }
+
+    function readCsvFile(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const r = new FileReader();
+      r.onload = () => { document.getElementById("csvText").value = r.result; };
+      r.readAsText(file, "utf-8");
+    }
+    async function previewCsvImport() { await runCsvImport(true); }
+    async function applyCsvImport() {
+      if (!confirm("그룹웨어 명부를 실제 DB에 동기화(PII 제외)하시겠습니까?")) return;
+      await runCsvImport(false);
+    }
+    async function runCsvImport(dryRun) {
+      const txt = document.getElementById("csvText").value;
+      if (!txt.trim()) { toast("CSV 내용을 입력하거나 파일을 선택하세요.", true); return; }
+      try {
+        const res = await apiFetch("/api/admin/import-csv", {
+          method: "POST",
+          body: JSON.stringify({ csv_text: txt, dry_run: dryRun }),
+        });
+        document.getElementById("csvResult").innerHTML = `
+          <div class="box-group">
+            <strong>${dryRun ? "미리보기 결과 (DB 미반영)" : "✅ DB 일괄 동기화 완료"}</strong> —
+            인식 사원: <b>${res.total_parsed}</b>명 |
+            신규 등록(설정대기): <b>${res.created_count}</b>명 |
+            조직/상태 갱신: <b>${res.updated_count}</b>명 |
+            일시정지 자동 잠금: <b>${res.locked_count}</b>명
+            <div style="margin-top:6px; color:#94a3b8;">${esc((res.summary_lines || []).slice(0, 12).join(" / "))}</div>
+          </div>`;
+        if (!dryRun) await loadAllAdminData();
+      } catch (e) { toast("CSV 처리 오류: " + e.message, true); }
+    }
+
+    function renderPartnersAndTokens() {
+      document.getElementById("partnersBody").innerHTML = partnersList.map(p => `
+        <tr>
+          <td><strong>${esc(p.partner_code)}</strong></td>
+          <td>${esc(p.wh_name)}</td>
+          <td>${esc(p.process_types)}</td>
+          <td>${esc(p.manager_name || "-")}</td>
+          <td>${p.is_active ? '<span class="pill p-green">활성</span>' : '<span class="pill p-red">차단</span>'}</td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <input id="pw_${esc(p.partner_code)}" class="input" style="width:120px;" placeholder="새 접속코드">
+              <button class="btn btn-sm btn-blue" onclick="updatePartner('${esc(p.partner_code)}', true)">코드 변경</button>
+              <button class="btn btn-sm ${p.is_active ? 'btn-danger' : 'btn-primary'}" onclick="togglePartner('${esc(p.partner_code)}', ${p.is_active ? 0 : 1})">${p.is_active ? '중지' : '활성화'}</button>
+            </div>
+          </td>
+        </tr>`).join("");
+
+      document.getElementById("tokensBody").innerHTML = tokensList.map(t => `
+        <tr>
+          <td>${t.token_id}</td>
+          <td><code>${esc(t.token_prefix)}...</code></td>
+          <td><strong>${esc(t.token_name)}</strong></td>
+          <td><span class="pill p-blue">${esc(t.scope_type)}</span></td>
+          <td>${t.is_active ? '<span class="pill p-green">활성</span>' : '<span class="pill p-red">폐기됨</span>'}</td>
+          <td>${esc(t.last_used_at || "-")}</td>
+          <td>${esc(t.created_by_emp_no || "-")}</td>
+          <td>${t.is_active ? `<button class="btn btn-sm btn-danger" onclick="revokeToken(${t.token_id})">즉시 폐기</button>` : '-'}</td>
+        </tr>`).join("");
+    }
+
+    async function updatePartner(code) {
+      const v = (document.getElementById("pw_" + code).value || "").trim();
+      if (v.length < 4) { toast("협력사 접속코드는 4자 이상 입력하세요.", true); return; }
+      try {
+        await apiFetch("/api/admin/partners/update", { method: "POST", body: JSON.stringify({ partner_code: code, new_access_code: v }) });
+        document.getElementById("pw_" + code).value = "";
+        toast(`협력사 [${code}] 접속코드 변경 완료`);
+      } catch (e) { toast("변경 실패: " + e.message, true); }
+    }
+    async function togglePartner(code, act) {
+      try {
+        await apiFetch("/api/admin/partners/update", { method: "POST", body: JSON.stringify({ partner_code: code, is_active: !!act }) });
+        toast(`협력사 [${code}] 상태 변경 완료`);
+        await loadAllAdminData();
+      } catch (e) { toast("상태 변경 실패: " + e.message, true); }
+    }
+    async function createApiToken() {
+      const name = document.getElementById("tokName").value.trim();
+      const scope = document.getElementById("tokScope").value;
+      if (!name) { toast("토큰 용도명을 입력하세요.", true); return; }
+      try {
+        const res = await apiFetch("/api/admin/tokens/create", { method: "POST", body: JSON.stringify({ token_name: name, scope_type: scope }) });
+        document.getElementById("tokName").value = "";
+        showSecretBox(`API 토큰 발급 완료 (${scope})\n\nX-API-Key: ${res.raw_token}\n\n※ 이 키는 크롬 확장/키오스크 설정에 1회 입력 후 보관하세요.`);
+        await loadAllAdminData();
+      } catch (e) { toast("발급 실패: " + e.message, true); }
+    }
+    async function revokeToken(tid) {
+      if (!confirm(`토큰 ID=${tid} 를 즉시 폐기하시겠습니까?`)) return;
+      try {
+        await apiFetch("/api/admin/tokens/revoke", { method: "POST", body: JSON.stringify({ token_id: tid }) });
+        toast("API 토큰 폐기 완료");
+        await loadAllAdminData();
+      } catch (e) { toast("폐기 실패: " + e.message, true); }
+    }
+
+    async function loadAuditAndSessions() {
+      const tp = document.getElementById("auditTypeFilter").value;
+      const emp = document.getElementById("auditEmpFilter").value.trim();
+      try {
+        const res = await apiFetch(`/api/admin/audit-logs?action_type=${encodeURIComponent(tp)}&emp_no=${encodeURIComponent(emp)}`);
+        document.getElementById("sessionsBody").innerHTML = (res.sessions || []).map(s => `
+          <tr>
+            <td><span class="pill p-blue">${esc(s.session_type)}</span></td>
+            <td><strong>${esc(s.emp_no || s.partner_code)}</strong></td>
+            <td><code>${esc(s.client_ip)}</code></td>
+            <td>${esc(s.issued_at)}</td>
+            <td>${esc(s.last_activity_at)}</td>
+            <td>${esc(s.expires_at)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="killSession('${esc(s.session_token_hash)}')">강제 종료</button></td>
+          </tr>`).join("");
+        document.getElementById("auditBody").innerHTML = (res.logs || []).map(l => {
+          const acCls = (l.action_type === "FORBIDDEN_403" || l.action_type === "ACCOUNT_LOCKED" || l.action_type === "LOGIN_FAIL") ? "p-red" : (l.action_type === "USER_MOD" ? "p-amber" : "p-green");
+          return `<tr>
+            <td style="font-family:monospace;font-size:11px;">${esc(l.event_at)}</td>
+            <td><strong>${esc(l.emp_no || "-")}</strong></td>
+            <td>${esc(l.display_name || "-")}</td>
+            <td>${esc(l.role_code || "-")}</td>
+            <td><code>${esc(l.client_ip || "-")}</code></td>
+            <td><span class="pill ${acCls}">${esc(l.action_type)}</span></td>
+            <td><code>${esc(l.resource_path || "-")}</code></td>
+            <td style="max-width:320px; overflow:hidden; text-overflow:ellipsis;" title="${esc(l.detail_json || '')}">${esc((l.target_key || "") + " " + (l.detail_json || ""))}</td>
+          </tr>`;
+        }).join("");
+      } catch (e) { toast("감사로그 로드 실패: " + e.message, true); }
+    }
+    async function killSession(hash) {
+      if (!confirm("해당 로그인 세션을 즉시 강제 종료(로그아웃)하시겠습니까?")) return;
+      try {
+        await apiFetch("/api/admin/sessions/revoke", { method: "POST", body: JSON.stringify({ token_hash: hash }) });
+        toast("세션 강제 종료 완료");
+        await loadAuditAndSessions();
+      } catch (e) { toast("세션 종료 실패: " + e.message, true); }
+    }
+
+    function showSecretBox(text) {
+      document.getElementById("secretBoxText").textContent = text;
+      document.getElementById("secretBoxModal").classList.add("open");
+    }
+    function copySecretBox() {
+      navigator.clipboard.writeText(document.getElementById("secretBoxText").textContent);
+      toast("클립보드에 복사되었습니다.");
+    }
+    async function doLogout() {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken }, body: "{}" }).catch(() => {});
+      window.location.replace("/login");
+    }
+    init();
+  </script>
+</body>
+</html>

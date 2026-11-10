@@ -1,0 +1,51 @@
+# =========================================================================
+# DOSKO SYSTEM SECURITY GITIGNORE (사내 보안 및 개인정보 유출 방지)
+# =========================================================================
+
+# 1. 사원 개인정보 및 원본 엑셀/데이터 파일 차단
+*.xlsx
+*.xls
+*.csv
+*.tsv
+*.pptx
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+
+# 2. 로컬 데이터베이스, 레플리카 및 백업 파일 차단
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.replica_snap
+*.bak
+backups_*/
+reports/
+
+# 3. 서버 런타임 로그 및 상태 파일 차단
+*.log
+dosko_shared_state.json
+
+# 4. 임시 스크래치 및 일회성 검증 스크립트 차단
+scratch_*.py
+scratch_*.ps1
+test_*.ps1
+test_*.py
+inspect_*.py
+verify_*.py
+debug_*.py
+dump_*.py
+tmp_*.py
+
+# 5. 파이썬 및 IDE/환경설정 캐시 차단
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.*
+.wrangler/
+.agents/
+.gemini.md

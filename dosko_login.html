@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>(주)도스코 통합 관제 · 사번 로그인</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b0f19 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: #e2e8f0;
+    }
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .brand .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 12px #10b981;
+    }
+    .brand .title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #f8fafc;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    .field input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity 0.15s, transform 0.05s;
+    }
+    .btn:hover { opacity: 0.95; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .alert {
+      display: none;
+      background: rgba(127, 29, 29, 0.5);
+      border: 1px solid #ef4444;
+      color: #fecaca;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 16px;
+      white-space: pre-line;
+      word-break: break-all;
+    }
+    .alert-warn {
+      background: rgba(120, 53, 15, 0.55);
+      border: 1px solid #f59e0b;
+      color: #fef3c7;
+    }
+    .alert-success {
+      display: none;
+      background: rgba(6, 78, 59, 0.45);
+      border: 1px solid #10b981;
+      color: #a7f3d0;
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 16px;
+      white-space: pre-line;
+    }
+    .policy-box {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #1e293b;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .policy-box strong { color: #38bdf8; }
+    .links {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .links a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="dot"></div>
+      <div class="title">(주)도스코 통합 관제 · 로그인</div>
+    </div>
+    <p class="subtitle">
+      부여받은 <strong>사원번호(4자리)</strong>와 비밀번호로 로그인하세요.<br>
+      초기 비밀번호는 <strong>사번 + 생년월일 6자리</strong>입니다.
+    </p>
+
+    <div id="errBox" class="alert"></div>
+    <div id="okBox" class="alert-success"></div>
+
+    <form id="loginForm" autocomplete="off">
+      <div class="field">
+        <label for="empNo">사원번호 (로그인 ID)</label>
+        <input id="empNo" name="emp_no" type="text" inputmode="numeric" placeholder="사원번호 4자리 입력" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">비밀번호</label>
+        <input id="password" name="password" type="password" placeholder="비밀번호 입력" required>
+      </div>
+      <button id="submitBtn" class="btn" type="submit">로그인</button>
+    </form>
+
+    <div class="policy-box">
+      <strong>🔐 비밀번호 정책 및 보안 통제 기준</strong><br>
+      • <strong>초기 비밀번호</strong>: <code>사번 + 생년월일 6자리</code> (예: 1204750312)<br>
+      • <strong>최초 로그인</strong>: 로그인 즉시 <strong>본인 6자리 비밀번호</strong>로 변경 필수<br>
+      • <strong>오류 통제</strong>: 4회 오류 시 경고 발령, <strong>6회 오류 시 계정 차단</strong><br>
+      • <strong>차단 해제 및 초기화</strong>: 전산실(송구현 실장)에 요청 시 즉시 복구<br>
+      • <strong>긴급 조치</strong>: 차단 시 전체 권한이 있는 <strong>팀장(조장) 계정</strong>으로 생산내용 작성을 요청하세요.
+    </div>
+
+    <div class="links">
+      <span>DOSKO_ERP Security v2.1</span>
+      <a href="/portal">외주 협력사 포털 이동 →</a>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const nextUrl = params.get("next") || "";
+
+    function safeRedirect(target) {
+      if (target && target.startsWith("/") && !target.startsWith("//") && !target.startsWith("/login")) {
+        return target;
+      }
+      return null;
+    }
+
+    // 이미 유효 세션 보유 시 자동 이동
+    fetch("/api/auth/me", { credentials: "include", cache: "no-store" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data.authenticated && data.user) {
+          if (data.user.must_change_pw) {
+            window.location.replace("/change-password");
+            return;
+          }
+          const custom = data.user.role_code === "PROD_OP" ? "/easy" : (safeRedirect(nextUrl) || data.user.default_home || "/");
+          window.location.replace(custom);
+        }
+      }).catch(() => {});
+
+    const errBox = document.getElementById("errBox");
+    const okBox = document.getElementById("okBox");
+    const btn = document.getElementById("submitBtn");
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errBox.style.display = "none";
+      errBox.classList.remove("alert-warn");
+      okBox.style.display = "none";
+      btn.disabled = true;
+      btn.textContent = "인증 확인 중...";
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            emp_no: document.getElementById("empNo").value.trim(),
+            password: document.getElementById("password").value
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.status !== "ok") {
+          const msg = data.message || data.error || "로그인에 실패했습니다.";
+          errBox.textContent = msg;
+          if (msg.includes("경고") || msg.includes("⚠️")) {
+            errBox.classList.add("alert-warn");
+          }
+          errBox.style.display = "block";
+          return;
+        }
+        if (data.csrf_token) {
+          try { sessionStorage.setItem("dosko_csrf_token", data.csrf_token); } catch (_) {}
+        }
+        if (data.user && data.user.must_change_pw) {
+          window.location.replace("/change-password");
+          return;
+        }
+        const u = data.user || {};
+        const dest = (u.role_code === "PROD_OP") ? "/easy" : (safeRedirect(nextUrl) || u.default_home || "/");
+        window.location.replace(dest);
+      } catch (err) {
+        errBox.textContent = "통신 오류: " + err.message;
+        errBox.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "로그인";
+      }
+    });
+  </script>
+</body>
+</html>

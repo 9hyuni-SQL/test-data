@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>(주)도스코 외주가공 협력사 파트너 포털 - ECOUNT ERP 연동</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-subcard: #141f32;
+      --border-color: #334155;
+      --border-focus: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-accent: #38bdf8;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #8b5cf6;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", "맑은 고딕", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: #090e17;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .partner-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .partner-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .partner-select {
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #0284c7;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+    .btn-sync {
+      background: #0f766e;
+      color: #fff;
+      border: 1px solid #14b8a6;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-sync:hover { background: #115e59; }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Partner Status Card */
+    .partner-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f1f38 100%);
+      border: 1px solid #1e40af;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .banner-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .banner-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: #60a5fa;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .banner-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .banner-stats {
+      display: flex;
+      gap: 20px;
+    }
+    .stat-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      text-align: right;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .stat-val {
+      font-size: 17px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .stat-unit {
+      font-size: 12px;
+      font-weight: 500;
+      color: #94a3b8;
+      margin-left: 2px;
+    }
+
+    /* Tab Switcher */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+    .tab-btn {
+      background: #1e293b;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .tab-btn.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Section Panels */
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Two Column Layout */
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 16px;
+    }
+    @media (max-width: 1024px) {
+      .two-cols { grid-template-columns: 1fr; }
+    }
+
+    /* Card Panels */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 10px;
+    }
+
+    /* Table Styles */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    th {
+      background: #172554;
+      color: #93c5fd;
+      padding: 10px 12px;
+      font-weight: 700;
+      border-bottom: 1px solid #1e3a8a;
+      white-space: nowrap;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #293548;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+    tr:hover {
+      background: rgba(30, 58, 138, 0.25);
+    }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .font-num { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+    /* Interactive Form Elements */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+    .form-control {
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    /* Slit Items Builder */
+    .slit-builder-box {
+      background: var(--bg-subcard);
+      border: 1px solid #2c3a50;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slit-item-row {
+      display: grid;
+      grid-template-columns: 36px 90px 75px 85px 95px 120px 36px;
+      gap: 8px;
+      align-items: center;
+      background: #1a2638;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+    .slit-item-row input {
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      color: #fff;
+      padding: 6px 8px;
+      font-size: 13px;
+      text-align: right;
+    }
+    .slit-item-row .input-spec {
+      text-align: left;
+      font-family: monospace;
+      color: #38bdf8;
+    }
+    .btn-remove-row {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-add-slit {
+      background: #1e3a8a;
+      color: #93c5fd;
+      border: 1px dashed #3b82f6;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .btn-add-slit:hover { background: #2563eb; color: #fff; }
+
+    /* Settle Summary Panel */
+    .settle-summary-box {
+      background: linear-gradient(135deg, #172554, #1e1b4b);
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    .summary-row.highlight {
+      font-size: 16px;
+      font-weight: 800;
+      color: #38bdf8;
+      border-top: 1px dashed #4338ca;
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+    .loss-warning {
+      color: #f59e0b;
+      font-weight: 700;
+    }
+
+    /* Main Submit Button */
+    .btn-submit-main {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn-submit-main:hover { opacity: 0.95; }
+    .btn-submit-main:active { transform: scale(0.98); }
+
+    /* Print & Export Buttons */
+    .btn-action-group {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover { background: #475569; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .badge-blue { background: #1e40af; color: #93c5fd; }
+    .badge-green { background: #065f46; color: #6ee7b7; }
+    .badge-amber { background: #78350f; color: #fde68a; }
+    .badge-purple { background: #581c87; color: #e9d5ff; }
+
+    /* Security Veil & Partner Auth Overlay */
+    #dosko-portal-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    #portalLoginOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9990;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #portalLoginOverlay.open { display: flex; }
+    .portal-login-card {
+      width: 100%;
+      max-width: 420px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+    }
+    .portal-login-title {
+      font-size: 19px;
+      font-weight: 900;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .portal-login-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .portal-auth-badge {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.16);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      white-space: nowrap;
+    }
+    .portal-nav-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .portal-nav-btn:hover { background: #334155; color: #fff; }
+    .portal-logout-btn {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .portal-logout-btn:hover { background: rgba(239, 68, 68, 0.32); }
+    .portal-login-err {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fecaca;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .portal-price-hidden .portal-price-only { display: none !important; }
+    .portal-no-export .portal-export-only { display: none !important; }
+    .portal-readonly-banner {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .portal-readonly-btn {
+      opacity: 0.45 !important;
+      cursor: not-allowed !important;
+    }
+
+    /* Print Styles */
+    @media print {
+      body { background: #fff; color: #000; }
+      header, .tab-nav, .btn-submit-main, .btn-action-group, .slit-builder-box button, #dosko-portal-veil, #portalLoginOverlay { display: none !important; }
+      .card { border: 1px solid #ccc; background: #fff; color: #000; box-shadow: none; }
+      th { background: #eee !important; color: #000 !important; border: 1px solid #aaa; }
+      td { border: 1px solid #ddd; color: #000 !important; }
+      .stat-box, .settle-summary-box { background: #f9f9f9 !important; border: 1px solid #ccc !important; color: #000 !important; }
+      .stat-val, .summary-row.highlight { color: #000 !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Verification Veil -->
+  <div id="dosko-portal-veil">
+    <div style="font-size: 28px;">🔐</div>
+    <div>(주)도스코 외주 포털 인증 확인 중...</div>
+  </div>
+
+  <!-- Partner / Employee Login Modal -->
+  <div id="portalLoginOverlay">
+    <div class="portal-login-card">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <span class="badge badge-blue">DOSKO EXTERNAL PORTAL</span>
+        <span style="font-size:11px; color:#64748b; font-weight:700;">세션 보안 인증</span>
+      </div>
+      <div class="portal-login-title">협력사 파트너 포털 로그인</div>
+      <div class="portal-login-sub">
+        귀사 협력공장을 선택하고 발급된 전용 접속코드를 입력하세요.<br>
+        인증 완료 후 자사 보관 코일 및 입고 정산 내역만 안전하게 조회됩니다.
+      </div>
+      <div id="portalLoginError" class="portal-login-err"></div>
+      <form onsubmit="submitPortalLogin(event)" style="display:flex; flex-direction:column; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">협력공장 선택</label>
+          <select id="loginPartnerCode" class="form-control">
+            <option value="E01">4.이지철강</option>
+            <option value="D01">4.디아이스틸</option>
+            <option value="I01">4.아이엔</option>
+            <option value="C01">4.창성철강</option>
+            <option value="M01">4.면치용</option>
+            <option value="S01">명성스리팅</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">협력사 접속코드</label>
+          <input type="password" id="loginAccessCode" class="form-control" autocomplete="current-password" placeholder="접속코드를 입력하세요" required>
+        </div>
+        <button type="submit" id="btnPortalLoginSubmit" class="btn-submit-main" style="margin-top:4px;">
+          <span>🔓</span> 협력사 포털 접속
+        </button>
+      </form>
+      <div id="portalBlockedActions" style="display:none; margin-top:12px; text-align:center;">
+        <a id="portalBlockedHomeLink" href="/" class="portal-nav-btn" style="display:inline-block;">내 기본 화면으로 이동</a>
+      </div>
+      <div style="margin-top:16px; padding-top:14px; border-top:1px solid #334155; display:flex; align-items:center; justify-content:space-between; font-size:12px;">
+        <span style="color:#94a3b8;">(주)도스코 임직원이신가요?</span>
+        <a href="/login?next=/portal" style="color:#38bdf8; font-weight:700; text-decoration:none;">임직원 사번 로그인 →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand-area">
+      <div class="brand-badge">DOSKO EXTERNAL</div>
+      <div class="brand-title">(주)도스코 외주가공 협력사 파트너 포털</div>
+    </div>
+    <div class="partner-selector-wrap">
+      <span id="portalAuthBadge" class="portal-auth-badge" style="display:none;"></span>
+      <span class="partner-label">접속 협력공장:</span>
+      <select id="partnerSelect" class="partner-select" onchange="changePartner(this.value)">
+        <option value="E01">4.이지철강</option>
+        <option value="D01">4.디아이스틸</option>
+        <option value="I01">4.아이엔</option>
+        <option value="C01">4.창성철강</option>
+        <option value="M01">4.면치용</option>
+        <option value="S01">명성스리팅</option>
+      </select>
+      <button class="btn-sync" onclick="loadPortalData()">
+        <span>🔄</span> 동기화
+      </button>
+      <a id="portalAdminBackLink" href="/" class="portal-nav-btn" style="display:none;">대시보드</a>
+      <button id="btnPortalLogout" type="button" class="portal-logout-btn" style="display:none;" onclick="logoutPortal()">로그아웃</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <div id="portalReadonlyBanner" class="portal-readonly-banner">
+      👁️ 읽기 전용 권한으로 접속 중입니다. 입고 등록/전송 기능은 제한됩니다.
+    </div>
+    <!-- Partner Info Banner -->
+    <div class="partner-banner">
+      <div class="banner-info">
+        <div class="banner-name" id="bannerPartnerName">
+          4.이지철강 <span class="badge badge-blue">창고코드: E01</span>
+        </div>
+        <div class="banner-sub" id="bannerPartnerSub">
+          광폭 원소재 다중폭 슬리팅 전문 · 시리얼 채번 접두사: E (YYYYMMDD-E01~)
+        </div>
+      </div>
+      <div class="banner-stats">
+        <div class="stat-box">
+          <div class="stat-label">도스코 보관 원소재</div>
+          <div class="stat-val"><span id="statRawCount">0</span><span class="stat-unit">코일</span></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">보관 총중량</div>
+          <div class="stat-val"><span id="statRawWeight">0</span><span class="stat-unit">kg</span></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">당월 가공실적</div>
+          <div class="stat-val"><span id="statMonthProd">0</span><span class="stat-unit">kg</span></div>
+        </div>
+        <div class="stat-box portal-price-only">
+          <div class="stat-label">당월 정산예정액</div>
+          <div class="stat-val"><span id="statMonthAmt">0</span><span class="stat-unit">원</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-input" onclick="switchTab('tab-input')">
+        <span>✂️</span> 외주 슬리팅/가공 완료 & 도스코 입고 등록
+      </button>
+      <button class="tab-btn" data-tab="tab-stock" onclick="switchTab('tab-stock')">
+        <span>📦</span> 우리 공장 보관 도스코 원소재 코일 (<span id="tabStockCount">0</span>)
+      </button>
+      <button class="tab-btn" data-tab="tab-history" onclick="switchTab('tab-history')">
+        <span>📑</span> 입고 내역 및 임가공비 정산 명세서
+      </button>
+    </div>
+
+    <!-- TAB 1: 가공 완료 & 도스코 입고 등록 -->
+    <div id="tab-input" class="tab-panel active">
+      <div class="two-cols">
+        <!-- Left: 원소재 선택 및 투입 -->
+        <div class="card">
+          <div class="card-title">
+            <span>1. 가공 대상 원소재 코일 선택 (투입)</span>
+            <span class="badge badge-amber">출고창고: <span id="lblOutWh">4.이지철강</span></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">보관 원소재 선택</label>
+            <select id="selRawCoil" class="form-control" onchange="selectRawCoil(this.value)">
+              <option value="">-- 가공할 원소재 코일을 선택하세요 --</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">강종 (품목명)</label>
+              <input type="text" id="rawGrade" class="form-control" readonly placeholder="SK-5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">원소재 두께 (T, mm)</label>
+              <input type="text" id="rawT" class="form-control" readonly placeholder="1.600">
+            </div>
+            <div class="form-group">
+              <label class="form-label">원소재 폭 (W, mm)</label>
+              <input type="text" id="rawW" class="form-control" readonly placeholder="1211.00">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">원소재 롯트번호</label>
+              <input type="text" id="rawLot" class="form-control" readonly style="color: #f59e0b; font-weight: 700;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">원소재 총중량 (kg)</label>
+              <input type="text" id="rawWeight" class="form-control text-right" readonly style="color: #38bdf8; font-weight: 800;">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">가공 투입 중량 (kg)</label>
+              <input type="number" id="inWeight" class="form-control text-right" value="0" oninput="calculateBalance()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">가공 구분</label>
+              <select id="procType" class="form-control" onchange="changeProcessType(this.value)">
+                <option value="슬리팅">슬리팅 (광폭 분할)</option>
+                <option value="절단/샤링">절단 / 샤링</option>
+                <option value="R면치">R면치 / 에지 가공</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">가공 발주 지시 사항</label>
+            <input type="text" id="orderMemo" class="form-control" readonly placeholder="지시 사항 없음">
+          </div>
+        </div>
+
+        <!-- Right: 산출 슬리팅 규격 및 입고 등록 -->
+        <div class="card">
+          <div class="card-title">
+            <span>2. 산출물 슬리팅 규격 & 입고 등록 (도스코 창고 입고)</span>
+            <span class="badge badge-green">입고창고: 0.도스코 (001)</span>
+          </div>
+
+          <!-- Multi-Slit Items Builder -->
+          <div class="slit-builder-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 13px; font-weight: 700; color: #93c5fd;">📐 슬리팅 분할 코일 규격 목록</span>
+              <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="addSlitRow()">+ 슬리팅 규격 추가</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 36px 90px 75px 85px 95px 120px 36px; gap: 8px; font-size: 11px; color: #94a3b8; font-weight: 700; padding: 0 8px;">
+              <div>No</div>
+              <div>폭 (W, mm)</div>
+              <div>수량(EA)</div>
+              <div>롤당(kg)</div>
+              <div>총중량(kg)</div>
+              <div>시리얼/로트번호</div>
+              <div>삭제</div>
+            </div>
+
+            <div id="slitRowsContainer" style="display: flex; flex-direction: column; gap: 6px;">
+              <!-- Dynamic Rows inserted here -->
+            </div>
+          </div>
+
+          <!-- WIP & Loss / Settlement Summary -->
+          <div class="settle-summary-box">
+            <div class="summary-row">
+              <span>원소재 투입 중량:</span>
+              <span class="font-num"><strong id="sumInKg">0</strong> kg</span>
+            </div>
+            <div class="summary-row">
+              <span>산출 코일 합계 (생산):</span>
+              <span class="font-num"><strong id="sumOutKg" style="color: #38bdf8;">0</strong> kg (<span id="sumOutEa">0</span> EA)</span>
+            </div>
+            <div class="summary-row">
+              <span>잔여 원소재 재공 복귀 (4.이지철강 유지):</span>
+              <span class="font-num">
+                <input type="number" id="wipReturnKg" class="form-control" style="width: 100px; display: inline-block; padding: 2px 6px; height: 26px; text-align: right;" value="0" oninput="calculateBalance()"> kg
+                <span id="lblWipLot" style="margin-left: 6px; color: #fbbf24; font-size: 11px;"></span>
+              </span>
+            </div>
+            <div class="summary-row">
+              <span>스크랩 로스 (이카운트 0099 단가조정):</span>
+              <span class="font-num"><strong id="sumLossKg" class="loss-warning">0</strong> kg</span>
+            </div>
+            <div class="summary-row highlight portal-price-only">
+              <span>임가공비 정산 금액 (<span id="lblUnitPrice">65</span>원/kg):</span>
+              <span class="font-num">공급가액 <span id="sumSupplyAmt">0</span>원 (VAT <span id="sumVatAmt">0</span>원)</span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="btn-submit-main" onclick="submitOutsourcingInbound()">
+            <span>🚀</span> 이카운트 가공완료 & 도스코 입고 전송 (전표 생성)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 우리 공장 보관 도스코 원소재 코일 -->
+    <div id="tab-stock" class="tab-panel">
+      <div class="card">
+        <div class="card-title">
+          <span>우리 협력공장 보관 도스코 원재료 코일 현황</span>
+          <span class="badge badge-blue">창고: <span id="lblStockWh">4.이지철강</span></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>발주일자</th>
+                <th>발주번호</th>
+                <th>강종</th>
+                <th>원소재 규격</th>
+                <th>원소재 롯트번호</th>
+                <th class="text-right">보관 중량 (kg)</th>
+                <th>가공 지시 사항</th>
+                <th class="text-center">상태</th>
+                <th class="text-center">작업</th>
+              </tr>
+            </thead>
+            <tbody id="stockTableBody">
+              <tr><td colspan="9" class="text-center" style="padding: 30px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 입고 내역 및 임가공비 정산 명세서 -->
+    <div id="tab-history" class="tab-panel">
+      <div class="card">
+        <div class="card-title">
+          <span>외주가공 완료 내역 및 임가공비 월별 정산서</span>
+          <div class="btn-action-group portal-export-only">
+            <button class="btn-secondary" onclick="printPortalSettlement()"><span>🖨️</span> 정산서 A4 인쇄</button>
+            <button class="btn-secondary" onclick="exportCsv()"><span>📥</span> 엑셀(CSV) 다운로드</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>일자-No</th>
+                <th>가공구분</th>
+                <th>원소재 롯트</th>
+                <th class="text-right">투입(kg)</th>
+                <th>산출 생산 규격 (대표)</th>
+                <th class="text-right">생산수량</th>
+                <th class="text-right">생산중량(kg)</th>
+                <th class="text-right">재공(kg)</th>
+                <th class="text-right">0099 로스(kg)</th>
+                <th class="text-right portal-price-only">단가(원)</th>
+                <th class="text-right portal-price-only">공급가액(원)</th>
+                <th class="text-right portal-price-only">부가세(원)</th>
+                <th class="text-right portal-price-only">합계금액(원)</th>
+                <th class="text-center">정산상태</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr><td colspan="14" class="text-center" style="padding: 30px; color: #64748b;">내역을 불러오는 중입니다...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DOSKO_LOCAL_HOST = "http://127.0.0.1:8089";
+    let currentPortalSyncHost = (window.location.protocol.indexOf("http") === 0)
+      ? window.location.origin
+      : DOSKO_LOCAL_HOST;
+
+    let PORTAL_AUTH_MODE = null; // 'PARTNER' | 'USER' | null
+    let DOSKO_PARTNER_CTX = null;
+    let DOSKO_PORTAL_USER = null;
+    let portalCsrfToken = "";
+        function portalLocalYmd(d = new Date()) {
+            const kst = new Date(d.getTime() + 9 * 3600 * 1000);
+            return kst.toISOString().slice(0, 10);
+        }
+
+    function portalCanViewPrice() {
+      if (PORTAL_AUTH_MODE === "PARTNER") return true;
+      if (PORTAL_AUTH_MODE === "USER" && DOSKO_PORTAL_USER) return !!DOSKO_PORTAL_USER.can_view_price;
+      return false;
+    }
+
+    function portalCanExportExcel() {
+      if (PORTAL_AUTH_MODE === "PARTNER") return true;
+      if (PORTAL_AUTH_MODE === "USER" && DOSKO_PORTAL_USER) return !!DOSKO_PORTAL_USER.can_export_excel;
+      return false;
+    }
+
+    function portalCanMutate() {
+      if (PORTAL_AUTH_MODE === "PARTNER") return true;
+      if (PORTAL_AUTH_MODE === "USER" && DOSKO_PORTAL_USER) {
+        if (DOSKO_PORTAL_USER.role_code === "EXEC_READ") return false;
+        const p = DOSKO_PORTAL_USER.module_perms && DOSKO_PORTAL_USER.module_perms.outsourcing;
+        return p === "RW";
+      }
+      return false;
+    }
+
+    function hidePortalVeil() {
+      const veil = document.getElementById("dosko-portal-veil");
+      if (veil) veil.style.display = "none";
+    }
+
+    function showPortalLoginOverlay(errMsg, homeUrl) {
+      PORTAL_AUTH_MODE = null;
+      DOSKO_PARTNER_CTX = null;
+      DOSKO_PORTAL_USER = null;
+      portalCsrfToken = "";
+      const overlay = document.getElementById("portalLoginOverlay");
+      const errEl = document.getElementById("portalLoginError");
+      const blockedBox = document.getElementById("portalBlockedActions");
+      const homeLink = document.getElementById("portalBlockedHomeLink");
+      if (errEl) {
+        if (errMsg) {
+          errEl.textContent = errMsg;
+          errEl.style.display = "block";
+        } else {
+          errEl.textContent = "";
+          errEl.style.display = "none";
+        }
+      }
+      if (blockedBox && homeLink) {
+        if (homeUrl) {
+          homeLink.href = homeUrl;
+          blockedBox.style.display = "block";
+        } else {
+          blockedBox.style.display = "none";
+        }
+      }
+      if (overlay) overlay.classList.add("open");
+      hidePortalVeil();
+    }
+
+    function applyPortalUiPermissions() {
+      document.body.classList.toggle("portal-price-hidden", !portalCanViewPrice());
+      document.body.classList.toggle("portal-no-export", !portalCanExportExcel());
+      const canEdit = portalCanMutate();
+      const roBanner = document.getElementById("portalReadonlyBanner");
+      if (roBanner) roBanner.style.display = canEdit ? "none" : "block";
+      document.querySelectorAll("#tab-input .btn-submit-main, #tab-input .slit-builder-box button").forEach(btn => {
+        btn.disabled = !canEdit;
+        btn.classList.toggle("portal-readonly-btn", !canEdit);
+      });
+      ["selRawCoil", "inWeight", "procType", "wipReturnKg"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !canEdit;
+      });
+    }
+
+    async function doskoPortalFetch(path, options) {
+      const p = path.startsWith("/") ? path : `/${path}`;
+      const opts = Object.assign({}, options || {});
+      opts.credentials = "include";
+      const method = (opts.method || "GET").toUpperCase();
+      const headers = new Headers(opts.headers || {});
+      if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+        if (portalCsrfToken && !headers.has("X-CSRF-Token")) {
+          headers.set("X-CSRF-Token", portalCsrfToken);
+        }
+      }
+      opts.headers = headers;
+
+      const res = await fetch(`${currentPortalSyncHost}${p}`, opts);
+
+      const isAuthCheck = (
+        p.startsWith("/api/portal/login") ||
+        p.startsWith("/api/portal/me") ||
+        p.startsWith("/api/auth/me")
+      );
+      if (res.status === 401 && !isAuthCheck) {
+        showPortalLoginOverlay("세션이 만료되었거나 인증되지 않았습니다. 다시 로그인하세요.");
+      }
+      return res;
+    }
+
+    async function bootstrapPortalAuth() {
+      try {
+        // 1) Check dedicated partner portal session first
+        const pRes = await doskoPortalFetch("/api/portal/me", { cache: "no-store" });
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          if (pData && pData.authenticated && pData.partner) {
+            PORTAL_AUTH_MODE = "PARTNER";
+            DOSKO_PARTNER_CTX = pData.partner;
+            DOSKO_PORTAL_USER = null;
+            portalCsrfToken = pData.csrf_token || "";
+
+            const sel = document.getElementById("partnerSelect");
+            if (sel) {
+              sel.value = pData.partner.partner_code;
+              sel.disabled = true;
+            }
+            const badge = document.getElementById("portalAuthBadge");
+            if (badge) {
+              badge.textContent = `협력사: ${pData.partner.wh_name}`;
+              badge.style.display = "inline-block";
+            }
+            const backLink = document.getElementById("portalAdminBackLink");
+            if (backLink) backLink.style.display = "none";
+            const logoutBtn = document.getElementById("btnPortalLogout");
+            if (logoutBtn) logoutBtn.style.display = "inline-block";
+
+            document.getElementById("portalLoginOverlay")?.classList.remove("open");
+            applyPortalUiPermissions();
+            hidePortalVeil();
+            changePartner(pData.partner.partner_code);
+            await loadPortalData();
+            return;
+          }
+        }
+
+        // 2) Fallback: check internal employee session
+        const uRes = await doskoPortalFetch("/api/auth/me", { cache: "no-store" });
+        if (uRes.ok) {
+          const uData = await uRes.json();
+          if (uData && uData.authenticated && uData.user) {
+            const u = uData.user;
+            if (u.must_change_pw) {
+              window.location.replace("/change-password?next=/portal");
+              return;
+            }
+            const osPerm = (u.module_perms && u.module_perms.outsourcing) || "NONE";
+            if (u.role_code === "PROD_OP" || osPerm === "NONE") {
+              showPortalLoginOverlay(
+                "외주가공 파트너 포털 접근 권한이 없는 계정입니다. 협력사 코드로 로그인하거나 기본 화면으로 이동하세요.",
+                u.default_home || "/easy"
+              );
+              return;
+            }
+            PORTAL_AUTH_MODE = "USER";
+            DOSKO_PORTAL_USER = u;
+            DOSKO_PARTNER_CTX = null;
+            portalCsrfToken = uData.csrf_token || "";
+
+            const sel = document.getElementById("partnerSelect");
+            if (sel) sel.disabled = false;
+            const badge = document.getElementById("portalAuthBadge");
+            if (badge) {
+              badge.textContent = `${u.display_name} (${u.role_label || u.role_code})`;
+              badge.style.display = "inline-block";
+            }
+            const backLink = document.getElementById("portalAdminBackLink");
+            if (backLink) {
+              backLink.href = u.default_home || "/";
+              backLink.style.display = "inline-block";
+            }
+            const logoutBtn = document.getElementById("btnPortalLogout");
+            if (logoutBtn) logoutBtn.style.display = "inline-block";
+
+            document.getElementById("portalLoginOverlay")?.classList.remove("open");
+            applyPortalUiPermissions();
+            hidePortalVeil();
+            changePartner((sel && sel.value) || "E01");
+            await loadPortalData();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("포털 인증 확인 실패:", err);
+      }
+      showPortalLoginOverlay("");
+    }
+
+    async function submitPortalLogin(evt) {
+      if (evt) evt.preventDefault();
+      const partnerCode = document.getElementById("loginPartnerCode")?.value || "E01";
+      const accessCode = document.getElementById("loginAccessCode")?.value || "";
+      const errEl = document.getElementById("portalLoginError");
+      const btn = document.getElementById("btnPortalLoginSubmit");
+      if (errEl) errEl.style.display = "none";
+      if (btn) btn.disabled = true;
+      try {
+        const res = await doskoPortalFetch("/api/portal/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ partner_code: partnerCode, access_code: accessCode })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.status !== "ok") {
+          const msg = data.message || data.error || "협력사 인증에 실패했습니다.";
+          if (errEl) {
+            errEl.textContent = msg;
+            errEl.style.display = "block";
+          }
+          return;
+        }
+        const pwEl = document.getElementById("loginAccessCode");
+        if (pwEl) pwEl.value = "";
+        await bootstrapPortalAuth();
+      } catch (err) {
+        if (errEl) {
+          errEl.textContent = "서버 연결에 실패했습니다: " + err.message;
+          errEl.style.display = "block";
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function logoutPortal() {
+      const endpoint = (PORTAL_AUTH_MODE === "PARTNER") ? "/api/portal/logout" : "/api/auth/logout";
+      try {
+        await doskoPortalFetch(endpoint, { method: "POST" });
+      } catch (e) {}
+      PORTAL_AUTH_MODE = null;
+      DOSKO_PARTNER_CTX = null;
+      DOSKO_PORTAL_USER = null;
+      portalCsrfToken = "";
+      globalOverview = null;
+      if (endpoint === "/api/auth/logout") {
+        window.location.replace("/login?next=/portal");
+      } else {
+        showPortalLoginOverlay("로그아웃되었습니다. 다시 접속하려면 협력사 접속코드를 입력하세요.");
+      }
+    }
+
+    let currentPartner = "E01";
+    let globalOverview = null;
+    let slitRows = [];
+
+    const PARTNER_META = {
+      "E01": { name: "4.이지철강", prefix: "E", price: 65.0, desc: "광폭 원소재 다중폭 슬리팅 전문", serialHint: "YYYYMMDD-E01~" },
+      "D01": { name: "4.디아이스틸", prefix: "D", price: 65.0, desc: "원재료 직송 보관 및 슬리팅 주력 외주처", serialHint: "YYYYMMDD-D01~" },
+      "I01": { name: "4.아이엔", prefix: "I", price: 70.0, desc: "소폭/박판 정밀 슬리팅 전문 외주처", serialHint: "YYYYMMDD-I01~" },
+      "C01": { name: "4.창성철강", prefix: "C", price: 65.0, desc: "후판/중판 슬리팅 및 절단 외주처", serialHint: "YYYYMMDD-C01~" },
+      "M01": { name: "4.면치용", prefix: "M", price: 120.0, desc: "열처리 전/후 정밀 에지 면치(R/각/SIDE) 전용", serialHint: "YYYYMMDD-M01~" },
+      "S01": { name: "명성스리팅", prefix: "S", price: 65.0, desc: "특수강 코일 슬리팅 외주처", serialHint: "YYYYMMDD-S01~" }
+    };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === tabId);
+      });
+    }
+
+    function changePartner(partnerCode) {
+      if (PORTAL_AUTH_MODE === "PARTNER" && DOSKO_PARTNER_CTX) {
+        partnerCode = DOSKO_PARTNER_CTX.partner_code;
+      }
+      currentPartner = partnerCode;
+      const sel = document.getElementById("partnerSelect");
+      if (sel && sel.value !== partnerCode) sel.value = partnerCode;
+      const meta = PARTNER_META[partnerCode];
+      if (meta) {
+        document.getElementById('bannerPartnerName').innerHTML = `${meta.name} <span class="badge badge-blue">창고코드: ${partnerCode}</span>`;
+        const pricePart = portalCanViewPrice() ? ` · 단가: ${meta.price}원/kg` : "";
+        document.getElementById('bannerPartnerSub').textContent = `${meta.desc}${pricePart} · 시리얼: ${meta.serialHint}`;
+        document.getElementById('lblOutWh').textContent = meta.name;
+        document.getElementById('lblStockWh').textContent = meta.name;
+        document.getElementById('lblUnitPrice').textContent = portalCanViewPrice() ? meta.price : "-";
+      }
+      renderStockTable();
+      renderHistoryTable();
+      updateBannerStats();
+      resetForm();
+      applyPortalUiPermissions();
+    }
+
+    async function loadPortalData() {
+      if (!PORTAL_AUTH_MODE) return;
+      try {
+        const res = await doskoPortalFetch("/api/ecount/overview", { cache: "no-store" });
+        if (!res.ok) throw new Error("서버 응답 오류: " + res.status);
+        globalOverview = await res.json();
+        renderStockTable();
+        renderHistoryTable();
+        updateBannerStats();
+      } catch (err) {
+        console.warn("포털 데이터 로드 실패:", err);
+      }
+    }
+
+    function updateBannerStats() {
+      if (!globalOverview) return;
+      const orders = (globalOverview.outsourcing_orders || []).filter(o => o.partner_code === currentPartner && (o.remain_weight_kg || 0) > 0);
+      const inbounds = (globalOverview.outsourcing_inbounds || []).filter(i => i.partner_code === currentPartner);
+
+      const rawCount = orders.length;
+      const rawWeight = orders.reduce((sum, o) => sum + (o.remain_weight_kg || 0), 0);
+      const monthProd = inbounds.reduce((sum, i) => sum + (i.prod_total_kg || 0), 0);
+      const canPrice = portalCanViewPrice();
+      const monthAmt = canPrice ? inbounds.reduce((sum, i) => sum + (Number(i.total_amt) || 0), 0) : 0;
+
+      document.getElementById('statRawCount').textContent = rawCount.toLocaleString();
+      document.getElementById('statRawWeight').textContent = Math.round(rawWeight).toLocaleString();
+      document.getElementById('statMonthProd').textContent = Math.round(monthProd).toLocaleString();
+      document.getElementById('statMonthAmt').textContent = canPrice ? Math.round(monthAmt).toLocaleString() : "-";
+      document.getElementById('tabStockCount').textContent = rawCount;
+    }
+
+    function renderStockTable() {
+      const tbody = document.getElementById('stockTableBody');
+      const sel = document.getElementById('selRawCoil');
+      sel.innerHTML = '<option value="">-- 가공할 원소재 코일을 선택하세요 --</option>';
+
+      if (!globalOverview || !globalOverview.outsourcing_orders) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 20px;">보관 원소재 내역이 없습니다.</td></tr>';
+        return;
+      }
+
+      const orders = globalOverview.outsourcing_orders.filter(o => o.partner_code === currentPartner && (o.remain_weight_kg || 0) > 0);
+      if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 20px;">현재 협력공장에 보관 중인 잔여 원소재 코일이 없습니다.</td></tr>';
+        return;
+      }
+
+      const canEdit = portalCanMutate();
+      let html = "";
+      orders.forEach(o => {
+        const remKg = Number(o.remain_weight_kg) || 0;
+        sel.innerHTML += `<option value="${o.order_id}">[${o.steel_grade}] ${o.raw_spec_full} - 잔여: ${remKg.toLocaleString()}kg (LOT: ${o.raw_lot_no})</option>`;
+        html += `
+          <tr>
+            <td>${o.order_date || ""}</td>
+            <td><strong>${o.order_no || ""}</strong></td>
+            <td>${o.steel_grade || ""}</td>
+            <td style="color: #38bdf8; font-weight: 600;">${o.raw_spec_full || ""}</td>
+            <td style="color: #fbbf24; font-weight: 700;">${o.raw_lot_no || ""}</td>
+            <td class="text-right font-num" style="color: #67e8f9;">${remKg.toLocaleString()}</td>
+            <td style="color: #cbd5e1;">${o.target_slit_plan || ""}</td>
+            <td class="text-center"><span class="badge ${o.status === 'COMPLETED' ? 'badge-green' : (o.status === 'IN_PROGRESS' ? 'badge-amber' : 'badge-blue')}">${o.status || ""}</span></td>
+            <td class="text-center">
+              <button class="btn-secondary${canEdit ? '' : ' portal-readonly-btn'}" ${canEdit ? '' : 'disabled'} style="padding: 4px 10px; font-size: 11px;" onclick="loadOrderToForm(${o.order_id})">가공투입</button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('historyTableBody');
+      if (!globalOverview || !globalOverview.outsourcing_inbounds) {
+        tbody.innerHTML = '<tr><td colspan="14" class="text-center" style="padding: 20px;">입고 및 정산 내역이 없습니다.</td></tr>';
+        return;
+      }
+
+      const inbounds = globalOverview.outsourcing_inbounds.filter(i => i.partner_code === currentPartner);
+      if (inbounds.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="14" class="text-center" style="padding: 20px;">해당 협력공장의 가공입고 내역이 없습니다.</td></tr>';
+        return;
+      }
+
+      const canPrice = portalCanViewPrice();
+      let html = "";
+      inbounds.forEach(i => {
+        const upText = (canPrice && i.unit_price_kg != null) ? i.unit_price_kg : "-";
+        const supText = (canPrice && i.supply_amt != null) ? Number(i.supply_amt).toLocaleString() : "-";
+        const vatText = (canPrice && i.vat_amt != null) ? Number(i.vat_amt).toLocaleString() : "-";
+        const totText = (canPrice && i.total_amt != null) ? Number(i.total_amt).toLocaleString() : "-";
+        html += `
+          <tr>
+            <td><strong>${i.doc_date_no || ""}</strong></td>
+            <td>${i.process_type || ""}</td>
+            <td style="color: #fbbf24;">${i.raw_lot_no || ""}</td>
+            <td class="text-right font-num">${(Number(i.input_weight_kg) || 0).toLocaleString()}</td>
+            <td style="color: #38bdf8;">${i.prod_summary_spec || ""}</td>
+            <td class="text-right font-num">${i.prod_total_ea || 0}</td>
+            <td class="text-right font-num" style="color: #4ade80; font-weight: 700;">${(Number(i.prod_total_kg) || 0).toLocaleString()}</td>
+            <td class="text-right font-num" style="color: #fde047;">${(Number(i.wip_return_kg) || 0).toLocaleString()}</td>
+            <td class="text-right font-num" style="color: #f87171;">${(Number(i.loss_weight_kg) || 0).toLocaleString()}</td>
+            <td class="text-right font-num portal-price-only">${upText}</td>
+            <td class="text-right font-num portal-price-only">${supText}</td>
+            <td class="text-right font-num portal-price-only">${vatText}</td>
+            <td class="text-right font-num portal-price-only" style="color: #38bdf8; font-weight: 800;">${totText}</td>
+            <td class="text-center"><span class="badge ${i.settle_status === 'SETTLED' ? 'badge-green' : 'badge-amber'}">${i.settle_status || ""}</span></td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function selectRawCoil(orderId) {
+      if (!orderId || !globalOverview) return;
+      const order = globalOverview.outsourcing_orders.find(o => String(o.order_id) === String(orderId));
+      if (!order) return;
+
+      document.getElementById('rawGrade').value = order.steel_grade;
+      document.getElementById('rawT').value = Number(order.raw_thickness || 0).toFixed(3);
+      document.getElementById('rawW').value = Number(order.raw_width || 0).toFixed(2);
+      document.getElementById('rawLot').value = order.raw_lot_no;
+      document.getElementById('rawWeight').value = Number(order.remain_weight_kg || 0).toLocaleString();
+      document.getElementById('inWeight').value = order.remain_weight_kg;
+      document.getElementById('orderMemo').value = order.target_slit_plan || "";
+
+      const nextWip = generateNextWipLotNo(order.raw_lot_no);
+      document.getElementById('lblWipLot').textContent = `(복귀 롯트: ${nextWip})`;
+
+      initSlitRowsForCoil(order);
+      calculateBalance();
+    }
+
+    function loadOrderToForm(orderId) {
+      if (!portalCanMutate()) {
+        alert("읽기 전용 권한에서는 가공투입 등록이 허용되지 않습니다.");
+        return;
+      }
+      switchTab('tab-input');
+      document.getElementById('selRawCoil').value = orderId;
+      selectRawCoil(orderId);
+    }
+
+    function generateNextWipLotNo(baseLot) {
+      baseLot = (baseLot || "").trim();
+      if (!baseLot) return "";
+      const m = baseLot.match(/^(.*?)-(\d+)$/);
+      if (m) {
+        const prefix = m[1];
+        const nextNum = parseInt(m[2], 10) + 1;
+        return `${prefix}-${nextNum}`;
+      }
+      return `${baseLot}-1`;
+    }
+
+    function getTodayPrefix() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const pfx = PARTNER_META[currentPartner]?.prefix || "E";
+      return `${yyyy}${mm}${dd}-${pfx}`;
+    }
+
+    function initSlitRowsForCoil(order) {
+      slitRows = [];
+      const pfx = getTodayPrefix();
+      const halfW = (Number(order.raw_width || 0) / 2).toFixed(2);
+      const halfKg = Math.round(Number(order.remain_weight_kg || 0) / 2);
+      slitRows.push({ width: halfW, ea: 1, unit_kg: halfKg, lot: `${pfx}01` });
+      slitRows.push({ width: halfW, ea: 1, unit_kg: halfKg, lot: `${pfx}02` });
+      renderSlitRows();
+    }
+
+    function addSlitRow() {
+      if (!portalCanMutate()) {
+        alert("읽기 전용 권한입니다.");
+        return;
+      }
+      const pfx = getTodayPrefix();
+      const nextSeq = String(slitRows.length + 1).padStart(2, '0');
+      const prevW = slitRows.length > 0 ? slitRows[slitRows.length - 1].width : "100.00";
+      slitRows.push({ width: prevW, ea: 1, unit_kg: 500, lot: `${pfx}${nextSeq}` });
+      renderSlitRows();
+      calculateBalance();
+    }
+
+    function removeSlitRow(idx) {
+      if (!portalCanMutate()) return;
+      if (slitRows.length <= 1) {
+        alert("최소 1개 이상의 슬리팅 규격이 필요합니다.");
+        return;
+      }
+      slitRows.splice(idx, 1);
+      renderSlitRows();
+      calculateBalance();
+    }
+
+    function renderSlitRows() {
+      const container = document.getElementById('slitRowsContainer');
+      container.innerHTML = "";
+      const canEdit = portalCanMutate();
+
+      slitRows.forEach((r, idx) => {
+        const tot = Math.round(r.ea * r.unit_kg);
+        container.innerHTML += `
+          <div class="slit-item-row">
+            <div style="font-weight: 700; color: #94a3b8; text-align: center;">${idx + 1}</div>
+            <input type="number" step="0.01" value="${r.width}" ${canEdit ? '' : 'disabled'} onchange="updateSlitField(${idx}, 'width', this.value)">
+            <input type="number" value="${r.ea}" ${canEdit ? '' : 'disabled'} onchange="updateSlitField(${idx}, 'ea', this.value)">
+            <input type="number" value="${r.unit_kg}" ${canEdit ? '' : 'disabled'} onchange="updateSlitField(${idx}, 'unit_kg', this.value)">
+            <input type="text" value="${tot.toLocaleString()}" readonly style="background: #172554; color: #38bdf8; font-weight: 700;">
+            <input type="text" value="${r.lot}" ${canEdit ? '' : 'disabled'} onchange="updateSlitField(${idx}, 'lot', this.value)" style="text-align: left; color: #fde047;">
+            <button class="btn-remove-row" ${canEdit ? '' : 'disabled'} onclick="removeSlitRow(${idx})">×</button>
+          </div>
+        `;
+      });
+    }
+
+    function updateSlitField(idx, field, val) {
+      if (!slitRows[idx]) return;
+      if (field === 'width') slitRows[idx].width = parseFloat(val) || 0;
+      else if (field === 'ea') slitRows[idx].ea = parseInt(val, 10) || 1;
+      else if (field === 'unit_kg') slitRows[idx].unit_kg = parseFloat(val) || 0;
+      else if (field === 'lot') slitRows[idx].lot = val.trim();
+      renderSlitRows();
+      calculateBalance();
+    }
+
+    function calculateBalance() {
+      const inKg = parseFloat(document.getElementById('inWeight').value) || 0;
+      const wipKg = parseFloat(document.getElementById('wipReturnKg').value) || 0;
+
+      let outTotalKg = 0;
+      let outTotalEa = 0;
+      slitRows.forEach(r => {
+        outTotalEa += r.ea;
+        outTotalKg += (r.ea * r.unit_kg);
+      });
+
+      const lossKg = Math.max(0, Math.round(inKg - outTotalKg - wipKg));
+      const canPrice = portalCanViewPrice();
+      const unitPrice = PARTNER_META[currentPartner]?.price || 65.0;
+      const billableKg = outTotalKg;
+      const supplyAmt = canPrice ? Math.round(billableKg * unitPrice) : 0;
+      const vatAmt = canPrice ? Math.round(supplyAmt * 0.1) : 0;
+
+      document.getElementById('sumInKg').textContent = Math.round(inKg).toLocaleString();
+      document.getElementById('sumOutKg').textContent = Math.round(outTotalKg).toLocaleString();
+      document.getElementById('sumOutEa').textContent = outTotalEa;
+      document.getElementById('sumLossKg').textContent = lossKg.toLocaleString();
+      document.getElementById('sumSupplyAmt').textContent = canPrice ? supplyAmt.toLocaleString() : "-";
+      document.getElementById('sumVatAmt').textContent = canPrice ? vatAmt.toLocaleString() : "-";
+    }
+
+    function changeProcessType() {
+      calculateBalance();
+    }
+
+    async function submitOutsourcingInbound() {
+      if (!portalCanMutate()) {
+        alert("읽기 전용 권한에서는 외주가공 입고 전표 등록이 허용되지 않습니다.");
+        return;
+      }
+      const inKg = parseFloat(document.getElementById('inWeight').value) || 0;
+      if (inKg <= 0) {
+        alert("가공 투입 중량을 올바르게 입력해주세요.");
+        return;
+      }
+      const rawLot = document.getElementById('rawLot').value;
+      if (!rawLot) {
+        alert("원소재 코일을 먼저 선택해주세요.");
+        return;
+      }
+
+      let outTotalKg = 0;
+      let outTotalEa = 0;
+      slitRows.forEach(r => {
+        outTotalEa += r.ea;
+        outTotalKg += (r.ea * r.unit_kg);
+      });
+
+      const wipKg = parseFloat(document.getElementById('wipReturnKg').value) || 0;
+      const lossKg = Math.max(0, Math.round(inKg - outTotalKg - wipKg));
+      const canPrice = portalCanViewPrice();
+      const unitPrice = PARTNER_META[currentPartner]?.price || 65.0;
+      const supplyAmt = Math.round(outTotalKg * unitPrice);
+      const vatAmt = Math.round(supplyAmt * 0.1);
+      const totalAmt = supplyAmt + vatAmt;
+
+      const submitActor = (PORTAL_AUTH_MODE === "USER" && DOSKO_PORTAL_USER)
+        ? `${DOSKO_PORTAL_USER.display_name}(${DOSKO_PORTAL_USER.emp_no})`
+        : `${PARTNER_META[currentPartner]?.name || currentPartner} 외주포털`;
+
+      const payload = {
+        partner_code: currentPartner,
+        out_wh_code: currentPartner,
+        out_wh_name: PARTNER_META[currentPartner]?.name,
+        in_wh_code: "001",
+        in_wh_name: "0.도스코",
+        process_type: document.getElementById('procType').value,
+        raw_steel_grade: document.getElementById('rawGrade').value,
+        raw_thickness: parseFloat(document.getElementById('rawT').value),
+        raw_width: parseFloat(document.getElementById('rawW').value),
+        raw_spec_full: `${document.getElementById('rawT').value}*${document.getElementById('rawW').value}*(원재료)R`,
+        raw_lot_no: rawLot,
+        input_weight_kg: inKg,
+        slit_items: slitRows,
+        prod_total_ea: outTotalEa,
+        prod_total_kg: outTotalKg,
+        wip_return_kg: wipKg,
+        wip_lot_no: wipKg > 0 ? generateNextWipLotNo(rawLot) : "",
+        loss_item_code: "0099",
+        loss_item_name: "단가조정",
+        loss_weight_kg: lossKg,
+        unit_price_kg: unitPrice,
+        settlement_basis: "PROD_KG",
+        billable_weight_kg: outTotalKg,
+        supply_amt: supplyAmt,
+        vat_amt: vatAmt,
+        total_amt: totalAmt,
+        submitted_by: submitActor
+      };
+
+      const priceLine = canPrice ? `\n• 가공비 합계: ${totalAmt.toLocaleString()} 원` : "";
+      if (!confirm(`[이카운트 입고 전표 전송]\n\n• 가공처: ${payload.out_wh_name}\n• 산출 생산량: ${outTotalKg.toLocaleString()} kg (${outTotalEa} EA)\n• 재공 복귀: ${wipKg.toLocaleString()} kg\n• 단가조정(스크랩): ${lossKg.toLocaleString()} kg${priceLine}\n\n이카운트 ERP로 즉시 전송하시겠습니까?`)) {
+        return;
+      }
+
+      try {
+        const res = await doskoPortalFetch("/api/ecount/outsourcing-inbound", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok || result.status !== "ok") {
+          alert("❌ 등록 실패: " + (result.message || result.error || `HTTP ${res.status}`));
+          return;
+        }
+        alert("✅ 이카운트 생산입고 전표 및 외주정산 내역이 성공적으로 등록되었습니다!");
+        await loadPortalData();
+        switchTab('tab-history');
+      } catch (e) {
+        alert("서버 통신 오류: " + e.message);
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('selRawCoil').value = "";
+      document.getElementById('rawGrade').value = "";
+      document.getElementById('rawT').value = "";
+      document.getElementById('rawW').value = "";
+      document.getElementById('rawLot').value = "";
+      document.getElementById('rawWeight').value = "";
+      document.getElementById('inWeight').value = "0";
+      document.getElementById('wipReturnKg').value = "0";
+      document.getElementById('orderMemo').value = "";
+      slitRows = [];
+      renderSlitRows();
+      calculateBalance();
+    }
+
+    function printPortalSettlement() {
+      if (!portalCanExportExcel()) {
+        alert("엑셀/인쇄 내보내기 권한이 없습니다.");
+        return;
+      }
+      window.print();
+    }
+
+    function exportCsv() {
+      if (!portalCanExportExcel()) {
+        alert("엑셀/CSV 다운로드 권한이 없습니다.");
+        return;
+      }
+      if (!globalOverview || !globalOverview.outsourcing_inbounds) return;
+      const inbounds = globalOverview.outsourcing_inbounds.filter(i => i.partner_code === currentPartner);
+      const canPrice = portalCanViewPrice();
+      let csv = canPrice
+        ? "\uFEFF일자-No,가공구분,원소재롯트,투입중량(kg),생산규격,생산수량,생산중량(kg),재공중량(kg),로스중량(kg),단가,공급가액,부가세,합계금액\n"
+        : "\uFEFF일자-No,가공구분,원소재롯트,투입중량(kg),생산규격,생산수량,생산중량(kg),재공중량(kg),로스중량(kg)\n";
+      inbounds.forEach(i => {
+        const base = `"${i.doc_date_no}","${i.process_type}","${i.raw_lot_no}",${i.input_weight_kg},"${i.prod_summary_spec}",${i.prod_total_ea},${i.prod_total_kg},${i.wip_return_kg || 0},${i.loss_weight_kg || 0}`;
+        csv += canPrice
+          ? `${base},${i.unit_price_kg ?? ""},${i.supply_amt ?? ""},${i.vat_amt ?? ""},${i.total_amt ?? ""}\n`
+          : `${base}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `도스코_외주가공정산서_${currentPartner}_${portalLocalYmd()}.csv`;
+      link.click();
+    }
+
+    // Initial Load via Auth Bootstrap
+    window.addEventListener('DOMContentLoaded', () => {
+      bootstrapPortalAuth();
+    });
+  </script>
+</body>
+</html>
